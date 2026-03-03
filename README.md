@@ -2,6 +2,8 @@
 
 A Gravity Forms Feed Add-On that lets you create per-form expiration rules for entries. When an entry is submitted, the plugin computes an expiry timestamp and stores it as entry meta. A background job periodically checks for due entries and triggers the configured action.
 
+![Plugin Screenshot](https://github.com/guilamu/gf-advanced-expiring-entries/blob/main/screenshot.png)
+
 ## Expiry Sources
 
 - **Fixed date** — set a single calendar date shared by all entries on a form
