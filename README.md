@@ -118,6 +118,9 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.0.1 - 2026-03-03
+- **Improved:** Retroactive tool now shows a dropdown of feed names instead of requiring a raw Feed ID
+
 ### 1.0.0 - 2026-03-03
 - **New:** Initial release
 - **New:** Fixed, dynamic, and entry-date expiry types with offset and day-snapping

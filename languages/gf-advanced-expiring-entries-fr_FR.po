@@ -3,10 +3,10 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.0.0\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 00:00+0000\n"
-"PO-Revision-Date: 2026-03-03 16:57+0100\n"
+"PO-Revision-Date: 2026-03-03 21:06+0100\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"

@@ -46,7 +46,7 @@ class GF_AEE_Addon extends GFFeedAddOn
     {
         parent::pre_init();
 
-        if ( $this->is_gravityforms_supported() ) {
+        if ($this->is_gravityforms_supported()) {
             GF_AEE_Scheduler::setup_cron();
         }
     }
@@ -328,10 +328,9 @@ class GF_AEE_Addon extends GFFeedAddOn
                         'choices' => self::get_form_choices(),
                     ),
                     array(
-                        'label' => esc_html__('Feed ID', 'gf-advanced-expiring-entries'),
-                        'type'  => 'text',
+                        'label' => esc_html__('Feed', 'gf-advanced-expiring-entries'),
+                        'type'  => 'retroactive_feed_select',
                         'name'  => 'retroactive_feed_id',
-                        'class' => 'small',
                     ),
                     array(
                         'name' => 'retroactive_run_button',
@@ -385,7 +384,7 @@ class GF_AEE_Addon extends GFFeedAddOn
     public function settings_retroactive_button($field, $echo = true)
     {
         ob_start();
-        ?>
+?>
         <div class="gf-aee-tool-action">
             <button type="button" class="button" id="gf_aee_run_retroactive">
                 <?php esc_html_e('Run Retroactive Processing', 'gf-advanced-expiring-entries'); ?>
@@ -395,6 +394,23 @@ class GF_AEE_Addon extends GFFeedAddOn
         </div>
         <?php
         $html = ob_get_clean();
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
+    }
+
+    /**
+     * Render the retroactive feed select dropdown (custom field type).
+     *
+     * Outputs a <select> that starts empty and is populated via AJAX
+     * when the admin selects a form in the retroactive tool.
+     */
+    public function settings_retroactive_feed_select($field, $echo = true)
+    {
+        $html = '<select id="gf_aee_retroactive_feed_select" name="_gform_setting_retroactive_feed_id" class="gform-input__select">'
+            . '<option value="">' . esc_html__('— Select a form first —', 'gf-advanced-expiring-entries') . '</option>'
+            . '</select>';
         if ($echo) {
             echo $html;
         }
@@ -415,7 +431,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             <span id="gf_aee_expiry_check_spinner" class="spinner" style="float:none;"></span>
             <span id="gf_aee_expiry_check_status" class="gf-aee-action-msg"></span>
         </div>
-        <?php
+<?php
         $html = ob_get_clean();
         if ($echo) {
             echo $html;
@@ -444,8 +460,8 @@ class GF_AEE_Addon extends GFFeedAddOn
     public function settings_feed_summary($field, $echo = true)
     {
         $html = '<div id="gf-aee-feed-summary" class="gf-aee-feed-summary">'
-              . '<em>' . esc_html__('Adjust the settings above to see a summary of this feed rule.', 'gf-advanced-expiring-entries') . '</em>'
-              . '</div>';
+            . '<em>' . esc_html__('Adjust the settings above to see a summary of this feed rule.', 'gf-advanced-expiring-entries') . '</em>'
+            . '</div>';
         if ($echo) {
             echo $html;
         }
@@ -484,6 +500,7 @@ class GF_AEE_Addon extends GFFeedAddOn
         add_action('wp_ajax_gf_aee_run_retroactive', array($this, 'ajax_run_retroactive'));
         add_action('wp_ajax_gf_aee_run_expiry_check', array($this, 'ajax_run_expiry_check'));
         add_action('wp_ajax_gf_aee_feed_summary', array($this, 'ajax_feed_summary'));
+        add_action('wp_ajax_gf_aee_get_feeds_for_form', array($this, 'ajax_get_feeds_for_form'));
     }
 
     /**
@@ -545,6 +562,37 @@ class GF_AEE_Addon extends GFFeedAddOn
                 $processed
             ),
         ));
+    }
+
+    /**
+     * AJAX handler: return feeds for a given form.
+     */
+    public function ajax_get_feeds_for_form()
+    {
+        check_ajax_referer('gf_aee_get_feeds', 'nonce');
+
+        if (! current_user_can('manage_options')) {
+            wp_send_json_error(__('Unauthorized', 'gf-advanced-expiring-entries'));
+        }
+
+        $form_id = absint(rgpost('form_id'));
+        if (! $form_id) {
+            wp_send_json_error(__('Missing form_id.', 'gf-advanced-expiring-entries'));
+        }
+
+        $feeds  = $this->get_feeds($form_id);
+        $result = array();
+
+        if (is_array($feeds)) {
+            foreach ($feeds as $feed) {
+                $result[] = array(
+                    'id'   => rgar($feed, 'id'),
+                    'name' => rgars($feed, 'meta/feed_name') ?: sprintf(__('Feed #%d', 'gf-advanced-expiring-entries'), rgar($feed, 'id')),
+                );
+            }
+        }
+
+        wp_send_json_success($result);
     }
 
     /**
@@ -730,7 +778,7 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         // ── 3. Conditional logic ───────────────────────────────────────
         $condition_enabled = ! empty($meta['feed_condition_conditional_logic'])
-                          || ! empty($meta['feed_condition_conditional_logic_object']);
+            || ! empty($meta['feed_condition_conditional_logic_object']);
 
         $logic_obj = null;
         if (! empty($meta['feed_condition_conditional_logic_object'])) {
@@ -862,7 +910,11 @@ class GF_AEE_Addon extends GFFeedAddOn
         if ($is_plugin_settings) {
             $data['nonce']              = wp_create_nonce('gf_aee_retroactive');
             $data['nonceExpiryCheck']   = wp_create_nonce('gf_aee_expiry_check');
-            $data['selectFormFeed']     = __('Please select a form and enter a feed ID.', 'gf-advanced-expiring-entries');
+            $data['nonceGetFeeds']      = wp_create_nonce('gf_aee_get_feeds');
+            $data['selectFormFeed']     = __('Please select a form and a feed.', 'gf-advanced-expiring-entries');
+            $data['selectFormFirst']    = __('— Select a form first —', 'gf-advanced-expiring-entries');
+            $data['loadingFeeds']       = __('Loading…', 'gf-advanced-expiring-entries');
+            $data['noFeeds']            = __('— No feeds found —', 'gf-advanced-expiring-entries');
             $data['processing']         = __('Processing…', 'gf-advanced-expiring-entries');
             $data['errorPrefix']        = __('Error: ', 'gf-advanced-expiring-entries');
             $data['requestFailed']      = __('Request failed.', 'gf-advanced-expiring-entries');

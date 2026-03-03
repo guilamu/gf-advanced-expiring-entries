@@ -30,11 +30,11 @@
         $('#gf_aee_run_retroactive').on('click', function (e) {
             e.preventDefault();
 
-            var $btn     = $(this);
+            var $btn = $(this);
             var $spinner = $('#gf_aee_retroactive_spinner');
-            var $status  = $('#gf_aee_retroactive_status');
-            var formId   = $('[name="_gform_setting_retroactive_form_id"]').val();
-            var feedId   = $('[name="_gform_setting_retroactive_feed_id"]').val();
+            var $status = $('#gf_aee_retroactive_status');
+            var formId = $('[name="_gform_setting_retroactive_form_id"]').val();
+            var feedId = $('#gf_aee_retroactive_feed_select').val();
 
             if (!formId || !feedId) {
                 $status.text(strings.selectFormFeed);
@@ -46,8 +46,8 @@
             $status.text(strings.processing);
 
             $.post(strings.ajaxurl, {
-                action:  'gf_aee_run_retroactive',
-                nonce:   strings.nonce,
+                action: 'gf_aee_run_retroactive',
+                nonce: strings.nonce,
                 form_id: formId,
                 feed_id: feedId,
             }, function (response) {
@@ -73,9 +73,9 @@
         $('#gf_aee_run_expiry_check').on('click', function (e) {
             e.preventDefault();
 
-            var $btn     = $(this);
+            var $btn = $(this);
             var $spinner = $('#gf_aee_expiry_check_spinner');
-            var $status  = $('#gf_aee_expiry_check_status');
+            var $status = $('#gf_aee_expiry_check_status');
 
             $btn.prop('disabled', true);
             $spinner.addClass('is-active');
@@ -83,7 +83,7 @@
 
             $.post(strings.ajaxurl, {
                 action: 'gf_aee_run_expiry_check',
-                nonce:  strings.nonceExpiryCheck,
+                nonce: strings.nonceExpiryCheck,
             }, function (response) {
                 $btn.prop('disabled', false);
                 $spinner.removeClass('is-active');
@@ -100,6 +100,57 @@
         });
     }
 
+    /* ── Retroactive feed dropdown ────────────────────────────────────── */
+    function initRetroactiveFeedDropdown() {
+        if (!strings) return;
+
+        var $formSelect = $('[name="_gform_setting_retroactive_form_id"]');
+        var $feedSelect = $('#gf_aee_retroactive_feed_select');
+        if (!$formSelect.length || !$feedSelect.length) return;
+
+        $formSelect.on('change', function () {
+            var formId = $(this).val();
+            $feedSelect.empty();
+
+            if (!formId) {
+                $feedSelect.append(
+                    $('<option>', { value: '', text: strings.selectFormFirst || '\u2014 Select a form first \u2014' })
+                );
+                return;
+            }
+
+            $feedSelect.append(
+                $('<option>', { value: '', text: strings.loadingFeeds || 'Loading\u2026' })
+            );
+
+            $.post(strings.ajaxurl, {
+                action: 'gf_aee_get_feeds_for_form',
+                nonce: strings.nonceGetFeeds,
+                form_id: formId,
+            }, function (response) {
+                $feedSelect.empty();
+                if (response.success && response.data.length) {
+                    $feedSelect.append(
+                        $('<option>', { value: '', text: '\u2014 Select a feed \u2014' })
+                    );
+                    $.each(response.data, function (i, feed) {
+                        $feedSelect.append(
+                            $('<option>', { value: feed.id, text: feed.name })
+                        );
+                    });
+                } else {
+                    $feedSelect.append(
+                        $('<option>', { value: '', text: strings.noFeeds || '\u2014 No feeds found \u2014' })
+                    );
+                }
+            }).fail(function () {
+                $feedSelect.empty().append(
+                    $('<option>', { value: '', text: strings.requestFailed || 'Request failed.' })
+                );
+            });
+        });
+    }
+
     /* ── Live feed summary ────────────────────────────────────────────── */
     var summaryTimer = null;
 
@@ -112,7 +163,7 @@
         // Standard GF settings fields use name="_gform_setting_<name>".
         $('[name^="_gform_setting_"]').each(function () {
             var name = $(this).attr('name').replace('_gform_setting_', '');
-            var $el  = $(this);
+            var $el = $(this);
 
             // Skip unchecked radio/checkbox.
             if ($el.is(':radio') && !$el.is(':checked')) return;
@@ -152,10 +203,10 @@
         var meta = collectFeedMeta();
 
         $.post(strings.ajaxurl, {
-            action:  'gf_aee_feed_summary',
-            nonce:   strings.nonceFeedSummary,
+            action: 'gf_aee_feed_summary',
+            nonce: strings.nonceFeedSummary,
             form_id: strings.formId || 0,
-            meta:    meta,
+            meta: meta,
         }, function (response) {
             if (response.success && response.data.summary) {
                 $target.html('<p>' + $('<span>').text(response.data.summary).html() + '</p>');
@@ -202,6 +253,7 @@
     $(document).ready(function () {
         initDatepickers();
         initRetroactive();
+        initRetroactiveFeedDropdown();
         initExpiryCheck();
         initFeedSummary();
 

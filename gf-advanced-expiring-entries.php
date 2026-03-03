@@ -4,7 +4,7 @@
  * Plugin Name: GF Advanced Expiring Entries
  * Plugin URI:  https://github.com/guilamu/gf-advanced-expiring-entries
  * Description: Configure per-form expiration rules (feeds) for Gravity Forms entries. Supports fixed and dynamic expiry, multiple actions, pre-expiry notifications, and admin overrides.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Guilamu
  * Author URI: https://github.com/guilamu
  * Text Domain: gf-advanced-expiring-entries
@@ -19,11 +19,11 @@
 defined('ABSPATH') || exit;
 
 // Debug toggle: define GF_AEE_DEBUG as true in wp-config.php to enable verbose logging.
-if ( ! defined( 'GF_AEE_DEBUG' ) ) {
-    define( 'GF_AEE_DEBUG', false );
+if (! defined('GF_AEE_DEBUG')) {
+    define('GF_AEE_DEBUG', false);
 }
 
-define('GF_AEE_VERSION', '1.0.0');
+define('GF_AEE_VERSION', '1.0.1');
 define('GF_AEE_PLUGIN_FILE', __FILE__);
 define('GF_AEE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('GF_AEE_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -104,13 +104,13 @@ function gf_aee_deactivate()
 
 // ── Guilamu Bug Reporter integration ───────────────────────────────────────
 add_action('plugins_loaded', function () {
-    if ( class_exists( 'Guilamu_Bug_Reporter' ) ) {
-        Guilamu_Bug_Reporter::register( array(
+    if (class_exists('Guilamu_Bug_Reporter')) {
+        Guilamu_Bug_Reporter::register(array(
             'slug'        => 'gf-advanced-expiring-entries',
             'name'        => 'GF Advanced Expiring Entries',
             'version'     => GF_AEE_VERSION,
             'github_repo' => 'guilamu/gf-advanced-expiring-entries',
-        ) );
+        ));
     }
 }, 20);
 
@@ -119,23 +119,24 @@ add_filter('plugin_row_meta', 'gf_aee_plugin_row_meta', 10, 2);
 /**
  * Add "Report a Bug" link to the plugin row meta.
  */
-function gf_aee_plugin_row_meta( $links, $file ) {
-    if ( plugin_basename( GF_AEE_PLUGIN_FILE ) !== $file ) {
+function gf_aee_plugin_row_meta($links, $file)
+{
+    if (plugin_basename(GF_AEE_PLUGIN_FILE) !== $file) {
         return $links;
     }
 
-    if ( class_exists( 'Guilamu_Bug_Reporter' ) ) {
+    if (class_exists('Guilamu_Bug_Reporter')) {
         $links[] = sprintf(
             '<a href="#" class="guilamu-bug-report-btn" data-plugin-slug="%s" data-plugin-name="%s">%s</a>',
             'gf-advanced-expiring-entries',
-            esc_attr__( 'GF Advanced Expiring Entries', 'gf-advanced-expiring-entries' ),
-            esc_html__( '🐛 Report a Bug', 'gf-advanced-expiring-entries' )
+            esc_attr__('GF Advanced Expiring Entries', 'gf-advanced-expiring-entries'),
+            esc_html__('🐛 Report a Bug', 'gf-advanced-expiring-entries')
         );
     } else {
         $links[] = sprintf(
             '<a href="%s" target="_blank">%s</a>',
             'https://github.com/guilamu/guilamu-bug-reporter/releases',
-            esc_html__( '🐛 Report a Bug (install Bug Reporter)', 'gf-advanced-expiring-entries' )
+            esc_html__('🐛 Report a Bug (install Bug Reporter)', 'gf-advanced-expiring-entries')
         );
     }
 
