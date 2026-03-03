@@ -216,7 +216,6 @@ class GF_AEE_Log
         <style>
             .gf-aee-log-wrap .gf-aee-log-filters {
                 display: flex;
-                flex-wrap: wrap;
                 gap: 6px;
                 align-items: center;
                 margin-bottom: 6px;
