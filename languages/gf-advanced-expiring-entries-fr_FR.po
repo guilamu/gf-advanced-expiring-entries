@@ -1,0 +1,817 @@
+# Translation of GF Advanced Expiring Entries in French (France)
+# Copyright (C) 2026 Guillaume
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: GF Advanced Expiring Entries 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 00:00+0000\n"
+"PO-Revision-Date: 2026-03-03 16:49+0100\n"
+"Last-Translator: \n"
+"Language-Team: French (France)\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.4.4\n"
+"X-Domain: gf-advanced-expiring-entries\n"
+
+#. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = field label
+#: includes/class-gf-aee-addon.php:596
+msgid "%1$s %2$s the \"%3$s\" field value,"
+msgstr "%1$s %2$s la valeur du champ « %3$s »,"
+
+#. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = date source label
+#: includes/class-gf-aee-addon.php:564
+msgid "%1$s %2$s the %3$s,"
+msgstr "%1$s %2$s la %3$s,"
+
+#: includes/class-gf-aee-addon.php:528
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d minute"
+msgstr[1] "%d minutes"
+
+#: includes/class-gf-aee-addon.php:529
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d heure"
+msgstr[1] "%d heures"
+
+#: includes/class-gf-aee-addon.php:530
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d jour"
+msgstr[1] "%d jours"
+
+#: includes/class-gf-aee-addon.php:531
+msgid "%d week"
+msgid_plural "%d weeks"
+msgstr[0] "%d semaine"
+msgstr[1] "%d semaines"
+
+#: includes/class-gf-aee-addon.php:532
+msgid "%d month"
+msgid_plural "%d months"
+msgstr[0] "%d mois"
+msgstr[1] "%d mois"
+
+#: includes/class-gf-aee-log.php:226
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] "%d élément"
+msgstr[1] "%d éléments"
+
+#. translators: %1$s = notification name, %2$s = time offset
+#: includes/class-gf-aee-addon.php:684
+msgid "\"%1$s\" notification is sent %2$s before the entry expires."
+msgstr "La notification « %1$s » est envoyée %2$s avant l'expiration de l'entrée."
+
+#. translators: %1$s = "any" or "all", %2$s = list of conditions
+#: includes/class-gf-aee-addon.php:660
+msgid "— but only if %1$s of the following match: %2$s"
+msgstr "— mais uniquement si %1$s des conditions suivantes sont remplies : %2$s"
+
+#: includes/class-gf-aee-feed-settings.php:443
+msgid "— Select a date field —"
+msgstr "— Sélectionner un champ de date —"
+
+#: includes/class-gf-aee-feed-settings.php:487
+msgid "— Select a field —"
+msgstr "— Sélectionner un champ —"
+
+#: includes/class-gf-aee-addon.php:365
+msgid "— Select a form —"
+msgstr "— Sélectionner un formulaire —"
+
+#: includes/class-gf-aee-feed-settings.php:466
+msgid "— Select a notification —"
+msgstr "— Sélectionner une notification —"
+
+#: includes/class-gf-aee-expiry-runner.php:63
+msgid "[DRY-RUN] Would execute action."
+msgstr "[SIMULATION] L'action aurait été exécutée."
+
+#. translators: %s = time offset (e.g. "2 days")
+#: includes/class-gf-aee-addon.php:693
+msgid "A pre-expiry notification is sent %s before the entry expires."
+msgstr "Une notification de pré-expiration est envoyée %s avant l'expiration de l'entrée."
+
+#: includes/class-gf-aee-addon.php:618
+msgid "a field"
+msgstr "un champ"
+
+#: includes/class-gf-aee-addon.php:633
+msgid "a notification is triggered"
+msgstr "une notification est déclenchée"
+
+#: includes/class-gf-aee-addon.php:609
+msgid "a webhook is fired"
+msgstr "un webhook est déclenché"
+
+#: includes/class-gf-aee-addon.php:77
+#: includes/class-gf-aee-feed-settings.php:220
+#: includes/class-gf-aee-log.php:236
+msgid "Action"
+msgstr "Action"
+
+#: includes/class-gf-aee-expiry-runner.php:151
+msgid "Action completed."
+msgstr "Action terminée."
+
+#. translators: %s = API response message
+#: includes/class-gf-aee-expiry-runner.php:155
+msgid "Action failed. API returned: %s"
+msgstr "L'action a échoué. L'API a retourné : %s"
+
+#: admin/views/entry-meta-box.php:83
+msgid "Action Log (last 3)"
+msgstr "Journal des actions (3 dernières)"
+
+#: admin/views/entry-meta-box.php:17 includes/class-gf-aee-dashboard.php:42
+msgid "Active"
+msgstr "Actif"
+
+#: includes/class-gf-aee-feed-settings.php:105
+msgid "Add a time offset"
+msgstr "Ajouter un décalage horaire"
+
+#: includes/class-gf-aee-addon.php:414
+msgid "Adjust the settings above to see a summary of this feed rule."
+msgstr "Ajustez les paramètres ci-dessus pour voir un résumé de cette règle de flux."
+
+#: includes/class-gf-aee-addon.php:559
+msgid "after"
+msgstr "après"
+
+#: includes/class-gf-aee-addon.php:641
+msgid "all"
+msgstr "toutes"
+
+#: includes/class-gf-aee-log.php:203
+msgid "All actions"
+msgstr "Toutes les actions"
+
+#: includes/class-gf-aee-log.php:194
+msgid "All forms"
+msgstr "Tous les formulaires"
+
+#: includes/class-gf-aee-addon.php:640
+msgid "any"
+msgstr "l'une"
+
+#: includes/class-gf-aee-addon.php:546
+msgid "At a fixed date (not yet set),"
+msgstr "À une date fixe (non encore définie),"
+
+#: includes/class-gf-aee-feed-settings.php:71
+msgid "Based on a date field"
+msgstr "Basé sur un champ de date"
+
+#: includes/class-gf-aee-feed-settings.php:72
+msgid "Based on entry date"
+msgstr "Basé sur la date de l'entrée"
+
+#: includes/class-gf-aee-addon.php:557
+msgid "before"
+msgstr "avant"
+
+#: includes/class-gf-aee-feed-settings.php:210
+msgid "Change entry status"
+msgstr "Changer le statut de l'entrée"
+
+#: includes/class-gf-aee-addon.php:97
+msgid "Change Status"
+msgstr "Changer le statut"
+
+#: includes/class-gf-aee-addon.php:306
+msgid "Check Interval (minutes)"
+msgstr "Intervalle de vérification (minutes)"
+
+#: includes/class-gf-aee-feed-settings.php:421
+#: includes/class-gf-aee-feed-settings.php:426
+msgid "Conditional Logic"
+msgstr "Logique conditionnelle"
+
+#: includes/class-gf-aee-addon.php:649
+msgid "contains"
+msgstr "contient"
+
+#: includes/class-gf-aee-log.php:232
+msgid "Date / Time"
+msgstr "Date / Heure"
+
+#: includes/class-gf-aee-feed-settings.php:92
+msgid "Date Field"
+msgstr "Champ de date"
+
+#: includes/class-gf-aee-addon.php:578
+msgid "date field"
+msgstr "champ de date"
+
+#: includes/class-gf-aee-feed-settings.php:162
+#: includes/class-gf-aee-feed-settings.php:349
+msgid "Days"
+msgstr "Jours"
+
+#: includes/class-gf-aee-addon.php:96
+msgid "Delete"
+msgstr "Supprimer"
+
+#: includes/class-gf-aee-feed-settings.php:394
+msgid "Do not set expiry (entry stays forever)"
+msgstr "Ne pas définir d'expiration (l'entrée reste indéfiniment)"
+
+#: includes/class-gf-aee-addon.php:262
+msgid "Dry-Run Mode"
+msgstr "Mode simulation"
+
+#: includes/class-gf-aee-addon.php:89
+msgid "Dynamic"
+msgstr "Dynamique"
+
+#: includes/class-gf-aee-feed-settings.php:381
+msgid "Empty Date Fallback"
+msgstr "Date de secours si vide"
+
+#: includes/class-gf-aee-feed-settings.php:110
+#: includes/class-gf-aee-feed-settings.php:427
+msgid "Enable"
+msgstr "Activer"
+
+#: includes/class-gf-aee-addon.php:300
+msgid "Enable dry-run mode"
+msgstr "Activer le mode simulation"
+
+#: includes/class-gf-aee-feed-settings.php:323
+msgid "Enable Pre-Expiry Notification"
+msgstr "Activer la notification de pré-expiration"
+
+#: includes/class-gf-aee-feed-settings.php:183
+msgid "End of day (23:59)"
+msgstr "Fin de journée (23:59)"
+
+#: includes/class-gf-aee-addon.php:651
+msgid "ends with"
+msgstr "se termine par"
+
+#: includes/class-gf-aee-feed-settings.php:48
+msgid "Enter a name for this expiration feed."
+msgstr "Saisissez un nom pour ce flux d'expiration."
+
+#: includes/class-gf-aee-log.php:233
+msgid "Entry"
+msgstr "Entrée"
+
+#: includes/class-gf-aee-feed-settings.php:107
+msgid "Entry creation date"
+msgstr "Date de création de l'entrée"
+
+#: includes/class-gf-aee-addon.php:553
+msgid "entry creation date"
+msgstr "date de création de l'entrée"
+
+#: includes/class-gf-aee-addon.php:90
+msgid "Entry Date"
+msgstr "Date de l'entrée"
+
+#: includes/class-gf-aee-feed-settings.php:103
+msgid "Entry Date Source"
+msgstr "Source de la date de l'entrée"
+
+#: admin/views/entry-meta-box.php:32
+msgid "Entry Expiration"
+msgstr "Expiration de l'entrée"
+
+#: includes/class-gf-aee-feed-settings.php:108
+msgid "Entry last updated"
+msgstr "Dernière mise à jour de l'entrée"
+
+#: includes/class-gf-aee-addon.php:552
+msgid "entry last updated date"
+msgstr "date de dernière mise à jour de l'entrée"
+
+#: includes/class-gf-aee-addon.php:515
+msgid "Error: "
+msgstr "Erreur : "
+
+#. translators: %d = number of minutes
+#: includes/class-gf-aee-scheduler.php:217
+msgid "Every %d minute(s) (GF AEE)"
+msgstr "Toutes les %d minute(s) (GF AEE)"
+
+#: admin/views/entry-meta-box.php:20 includes/class-gf-aee-addon.php:176
+msgid "Exempt"
+msgstr "Exempté"
+
+#: admin/views/entry-meta-box.php:18 includes/class-gf-aee-addon.php:181
+#: includes/class-gf-aee-dashboard.php:44
+msgid "Expired"
+msgstr "Expiré"
+
+#: admin/views/entry-meta-box.php:43 includes/class-gf-aee-addon.php:134
+#: includes/class-gf-aee-addon.php:150
+msgid "Expires"
+msgstr "Expire"
+
+#: includes/class-gf-aee-addon.php:498
+msgid "Expiry check completed."
+msgstr "Vérification des expirations terminée."
+
+#: includes/class-gf-aee-dashboard.php:43
+msgid "Expiring &lt; 7d"
+msgstr "Expire &lt; 7j"
+
+#: includes/class-gf-aee-feed-settings.php:217
+msgid "Expiry Action"
+msgstr "Action à l'expiration"
+
+#: includes/class-gf-aee-addon.php:115
+msgid "Expiry Feed"
+msgstr "Flux d'expiration"
+
+#: includes/class-gf-aee-addon.php:349
+msgid "Expiry Log"
+msgstr "Journal d'expiration"
+
+#: includes/class-gf-aee-feed-settings.php:63
+msgid "Expiry Source"
+msgstr "Source d'expiration"
+
+#: includes/class-gf-aee-addon.php:76
+#: includes/class-gf-aee-feed-settings.php:66
+msgid "Expiry Type"
+msgstr "Type d'expiration"
+
+#: admin/views/entry-meta-box.php:19
+msgid "Extended"
+msgstr "Prolongé"
+
+#: includes/class-gf-aee-log.php:258
+msgid "Fail"
+msgstr "Échec"
+
+#: includes/class-gf-aee-log.php:214
+msgid "Failed only"
+msgstr "Échecs uniquement"
+
+#: includes/class-gf-aee-feed-settings.php:390
+msgid "Fallback"
+msgstr "Secours"
+
+#: includes/class-gf-aee-feed-settings.php:401
+msgid "Fallback Fixed Date"
+msgstr "Date fixe de secours"
+
+#: includes/class-gf-aee-log.php:235
+msgid "Feed"
+msgstr "Flux"
+
+#: includes/class-gf-aee-addon.php:328
+msgid "Feed ID"
+msgstr "ID du flux"
+
+#: includes/class-gf-aee-feed-settings.php:40
+msgid "Feed Name"
+msgstr "Nom du flux"
+
+#: includes/class-gf-aee-addon.php:458
+#: includes/class-gf-aee-expiry-runner.php:42
+msgid "Feed not found."
+msgstr "Flux introuvable."
+
+#: includes/class-gf-aee-log.php:216
+msgid "Filter"
+msgstr "Filtrer"
+
+#: includes/class-gf-aee-feed-settings.php:212
+msgid "Fire a webhook"
+msgstr "Déclencher un webhook"
+
+#: includes/class-gf-aee-addon.php:88
+msgid "Fixed"
+msgstr "Fixe"
+
+#: includes/class-gf-aee-feed-settings.php:70
+msgid "Fixed date"
+msgstr "Date fixe"
+
+#: includes/class-gf-aee-feed-settings.php:77
+msgid "Fixed Expiry Date"
+msgstr "Date d'expiration fixe"
+
+#: includes/class-gf-aee-addon.php:322 includes/class-gf-aee-dashboard.php:41
+#: includes/class-gf-aee-log.php:234
+msgid "Form"
+msgstr "Formulaire"
+
+#: includes/class-gf-aee-addon.php:463
+msgid "Form not found."
+msgstr "Formulaire introuvable."
+
+#: includes/class-gf-aee-addon.php:259
+msgid "General Settings"
+msgstr "Paramètres généraux"
+
+#: gf-advanced-expiring-entries.php:131
+msgid "GF Advanced Expiring Entries"
+msgstr "GF Advanced Expiring Entries"
+
+#: includes/class-gf-aee-addon.php:430
+msgid "GF Advanced Expiring Entries:"
+msgstr "GF Advanced Expiring Entries :"
+
+#: includes/class-gf-aee-addon.php:422
+msgid "GF Advanced Expiring Entries: Dry-Run mode is ACTIVE."
+msgstr "GF Advanced Expiring Entries : le mode simulation est ACTIF."
+
+#: includes/class-gf-aee-dashboard.php:22
+msgid "Gravity Forms — Expiring Entries"
+msgstr "Gravity Forms — Entrées expirantes"
+
+#: includes/class-gf-aee-addon.php:432
+msgid "Gravity Forms' own auto-deletion (gform_trash_expired_entries / gform_delete_expired_entries) is also active. Entries may be trashed or deleted by GF before this plugin's rules run. Consider disabling one to avoid conflicts."
+msgstr "La suppression automatique propre à Gravity Forms (gform_trash_expired_entries / gform_delete_expired_entries) est également active. Les entrées peuvent être mises à la corbeille ou supprimées par GF avant l'exécution des règles de cette extension. Envisagez de désactiver l'une des deux pour éviter les conflits."
+
+#: includes/class-gf-aee-feed-settings.php:161
+#: includes/class-gf-aee-feed-settings.php:348
+msgid "Hours"
+msgstr "Heures"
+
+#: includes/class-gf-aee-addon.php:312
+msgid "How often the expiry check runs, in minutes. Default: 1."
+msgstr "Fréquence d'exécution de la vérification des expirations, en minutes. Par défaut : 1."
+
+#: includes/class-gf-aee-addon.php:645
+msgid "is"
+msgstr "est"
+
+#: includes/class-gf-aee-addon.php:647
+msgid "is greater than"
+msgstr "est supérieur à"
+
+#: includes/class-gf-aee-addon.php:648
+msgid "is less than"
+msgstr "est inférieur à"
+
+#: includes/class-gf-aee-addon.php:646
+msgid "is not"
+msgstr "n'est pas"
+
+#: includes/class-gf-aee-addon.php:337
+msgid "Manual Expiry Check"
+msgstr "Vérification manuelle des expirations"
+
+#: includes/class-gf-aee-addon.php:338
+msgid "Manually trigger the expiry check right now, without waiting for the scheduled interval."
+msgstr "Déclencher manuellement la vérification des expirations maintenant, sans attendre l'intervalle programmé."
+
+#: admin/views/entry-meta-box.php:77
+msgid "Mark as Exempt (skip all processing)"
+msgstr "Marquer comme exempté (ignorer tout traitement)"
+
+#: includes/class-gf-aee-addon.php:613
+msgid "marked as read"
+msgstr "marquée comme lue"
+
+#: includes/class-gf-aee-addon.php:614
+msgid "marked as unread"
+msgstr "marquée comme non lue"
+
+#: includes/class-gf-aee-log.php:238
+msgid "Message"
+msgstr "Message"
+
+#: includes/class-gf-aee-addon.php:313
+msgid "min"
+msgstr "min"
+
+#: includes/class-gf-aee-feed-settings.php:160
+#: includes/class-gf-aee-feed-settings.php:347
+msgid "Minutes"
+msgstr "Minutes"
+
+#: includes/class-gf-aee-addon.php:453
+msgid "Missing form_id or feed_id."
+msgstr "form_id ou feed_id manquant."
+
+#: includes/class-gf-aee-feed-settings.php:164
+msgid "Months"
+msgstr "Mois"
+
+#: includes/class-gf-aee-feed-settings.php:208
+msgid "Move to Trash"
+msgstr "Mettre à la corbeille"
+
+#: includes/class-gf-aee-addon.php:75
+#: includes/class-gf-aee-feed-settings.php:43
+msgid "Name"
+msgstr "Nom"
+
+#: includes/class-gf-aee-addon.php:116
+msgid "New"
+msgstr "Nouveau"
+
+#: includes/class-gf-aee-feed-settings.php:256
+msgid "New Field Value"
+msgstr "Nouvelle valeur du champ"
+
+#: includes/class-gf-aee-addon.php:424
+msgid "No expiry actions will be executed. Disable this in the plugin settings."
+msgstr "Aucune action d'expiration ne sera exécutée. Désactivez ce mode dans les paramètres de l'extension."
+
+#: includes/class-gf-aee-dashboard.php:35
+msgid "No forms with expiry feeds configured."
+msgstr "Aucun formulaire avec des flux d'expiration configurés."
+
+#: includes/class-gf-aee-log.php:242
+msgid "No log entries found."
+msgstr "Aucune entrée de journal trouvée."
+
+#: includes/class-gf-aee-feed-settings.php:181
+msgid "No snap"
+msgstr "Pas d'arrondi"
+
+#: includes/class-gf-aee-addon.php:100
+#: includes/class-gf-aee-feed-settings.php:297
+msgid "Notification"
+msgstr "Notification"
+
+#. translators: %s = notification name
+#: includes/class-gf-aee-scheduler.php:192
+msgid "Notification %s sent."
+msgstr "Notification %s envoyée."
+
+#: includes/class-gf-aee-feed-settings.php:361
+msgid "Notification to Send"
+msgstr "Notification à envoyer"
+
+#: includes/class-gf-aee-feed-settings.php:123
+msgid "Offset Direction"
+msgstr "Sens du décalage"
+
+#: includes/class-gf-aee-feed-settings.php:156
+msgid "Offset Unit"
+msgstr "Unité du décalage"
+
+#: includes/class-gf-aee-feed-settings.php:140
+msgid "Offset Value"
+msgstr "Valeur du décalage"
+
+#: includes/class-gf-aee-log.php:256
+msgid "OK"
+msgstr "OK"
+
+#. translators: %s = fixed expiry date
+#: includes/class-gf-aee-addon.php:541
+msgid "On %s,"
+msgstr "Le %s,"
+
+#: admin/views/entry-meta-box.php:48
+msgid "Override"
+msgstr "Remplacement"
+
+#: includes/class-gf-aee-feed-settings.php:209
+msgid "Permanently Delete"
+msgstr "Supprimer définitivement"
+
+#: includes/class-gf-aee-addon.php:513
+msgid "Please select a form and enter a feed ID."
+msgstr "Veuillez sélectionner un formulaire et saisir un ID de flux."
+
+#: includes/class-gf-aee-feed-settings.php:320
+msgid "Pre-Expiry Notification"
+msgstr "Notification de pré-expiration"
+
+#: includes/class-gf-aee-feed-settings.php:428
+msgid "Process this feed if"
+msgstr "Traiter ce flux si"
+
+#. translators: %d = number of entries processed
+#: includes/class-gf-aee-addon.php:484
+msgid "Processed %d entries."
+msgstr "%d entrées traitées."
+
+#: includes/class-gf-aee-addon.php:514
+msgid "Processing…"
+msgstr "Traitement en cours…"
+
+#: includes/class-gf-aee-feed-settings.php:231
+msgid "Read"
+msgstr "Lu"
+
+#: includes/class-gf-aee-addon.php:350
+msgid "Recent expiry actions executed by the plugin."
+msgstr "Actions d'expiration récentes exécutées par l'extension."
+
+#: includes/class-gf-aee-addon.php:318
+msgid "Recompute Expiry for Existing Entries"
+msgstr "Recalculer l'expiration des entrées existantes"
+
+#: admin/views/entry-meta-box.php:67
+msgid "Remove override"
+msgstr "Supprimer le remplacement"
+
+#: includes/class-gf-aee-addon.php:516
+msgid "Request failed."
+msgstr "La requête a échoué."
+
+#: includes/class-gf-aee-log.php:219
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: includes/class-gf-aee-log.php:237
+msgid "Result"
+msgstr "Résultat"
+
+#: includes/class-gf-aee-addon.php:399
+msgid "Run Expiry Check Now"
+msgstr "Lancer la vérification des expirations"
+
+#: includes/class-gf-aee-addon.php:385
+msgid "Run Retroactive Processing"
+msgstr "Lancer le traitement rétroactif"
+
+#: includes/class-gf-aee-addon.php:517
+msgid "Running…"
+msgstr "Exécution en cours…"
+
+#: includes/class-gf-aee-feed-settings.php:88
+msgid "Select a fixed date/time at which entries expire."
+msgstr "Sélectionnez une date/heure fixe à laquelle les entrées expirent."
+
+#: includes/class-gf-aee-addon.php:319
+msgid "Select a form and feed, then click \"Run\" to apply expiry rules to existing entries that do not yet have an expiry timestamp."
+msgstr "Sélectionnez un formulaire et un flux, puis cliquez sur « Lancer » pour appliquer les règles d'expiration aux entrées existantes qui n'ont pas encore d'horodatage d'expiration."
+
+#: includes/class-gf-aee-feed-settings.php:327
+msgid "Send a notification before expiry"
+msgstr "Envoyer une notification avant l'expiration"
+
+#: admin/views/entry-meta-box.php:58
+msgid "Set Override Date"
+msgstr "Définir la date de remplacement"
+
+#: includes/class-gf-aee-log.php:187
+msgid "Skipped"
+msgstr "Ignoré"
+
+#. translators: %s = entry status label
+#: includes/class-gf-aee-expiry-runner.php:29
+msgid "Skipped: entry status is \"%s\" (already handled outside this plugin)."
+msgstr "Ignoré : le statut de l'entrée est « %s » (déjà traité en dehors de cette extension)."
+
+#: includes/class-gf-aee-feed-settings.php:177
+msgid "Snap To"
+msgstr "Arrondir à"
+
+#: includes/class-gf-aee-addon.php:615
+msgid "starred"
+msgstr "suivie"
+
+#: includes/class-gf-aee-feed-settings.php:233
+msgid "Starred"
+msgstr "Suivi"
+
+#: includes/class-gf-aee-feed-settings.php:182
+msgid "Start of day (00:00)"
+msgstr "Début de journée (00:00)"
+
+#: includes/class-gf-aee-addon.php:650
+msgid "starts with"
+msgstr "commence par"
+
+#: admin/views/entry-meta-box.php:39
+msgid "Status"
+msgstr "Statut"
+
+#: includes/class-gf-aee-log.php:212
+msgid "Success + Failed"
+msgstr "Succès + Échecs"
+
+#: includes/class-gf-aee-log.php:213
+msgid "Success only"
+msgstr "Succès uniquement"
+
+#: includes/class-gf-aee-feed-settings.php:244
+msgid "Target Field"
+msgstr "Champ cible"
+
+#: includes/class-gf-aee-feed-settings.php:227
+msgid "Target Status"
+msgstr "Statut cible"
+
+#. translators: %1$s = field label, %2$s = field value
+#: includes/class-gf-aee-addon.php:622
+msgid "the \"%1$s\" field is set to \"%2$s\""
+msgstr "le champ « %1$s » est défini à « %2$s »"
+
+#. translators: %s = notification name
+#: includes/class-gf-aee-addon.php:629
+msgid "the \"%s\" notification is triggered"
+msgstr "la notification « %s » est déclenchée"
+
+#. translators: %s = status label (e.g. "marked as read")
+#: includes/class-gf-aee-addon.php:617
+msgid "the entry is %s"
+msgstr "l'entrée est %s"
+
+#: includes/class-gf-aee-addon.php:607
+msgid "the entry is automatically moved to Trash"
+msgstr "l'entrée est automatiquement mise à la corbeille"
+
+#: includes/class-gf-aee-addon.php:608
+msgid "the entry is permanently deleted"
+msgstr "l'entrée est définitivement supprimée"
+
+#: includes/class-gf-aee-feed-settings.php:331
+msgid "Time Before Expiry"
+msgstr "Délai avant expiration"
+
+#: includes/class-gf-aee-addon.php:95
+msgid "Trash"
+msgstr "Corbeille"
+
+#: includes/class-gf-aee-feed-settings.php:213
+msgid "Trigger a GF notification"
+msgstr "Déclencher une notification GF"
+
+#: includes/class-github-updater.php:301
+msgid "Unable to rename the update folder. Please retry or update manually."
+msgstr "Impossible de renommer le dossier de mise à jour. Veuillez réessayer ou mettre à jour manuellement."
+
+#: includes/class-gf-aee-addon.php:448
+msgid "Unauthorized"
+msgstr "Non autorisé"
+
+#: includes/class-gf-aee-feed-settings.php:344
+msgid "Unit"
+msgstr "Unité"
+
+#: includes/class-gf-aee-feed-settings.php:232
+msgid "Unread"
+msgstr "Non lu"
+
+#: includes/class-gf-aee-feed-settings.php:211
+msgid "Update a field value"
+msgstr "Mettre à jour la valeur d'un champ"
+
+#: includes/class-gf-aee-addon.php:98
+msgid "Update Field"
+msgstr "Mettre à jour le champ"
+
+#: includes/class-gf-aee-feed-settings.php:396
+msgid "Use a specific fixed date"
+msgstr "Utiliser une date fixe spécifique"
+
+#: includes/class-gf-aee-feed-settings.php:395
+msgid "Use entry creation date"
+msgstr "Utiliser la date de création de l'entrée"
+
+#: includes/class-gf-aee-addon.php:99
+msgid "Webhook"
+msgstr "Webhook"
+
+#: includes/class-gf-aee-feed-settings.php:281
+msgid "Webhook Method"
+msgstr "Méthode du webhook"
+
+#: includes/class-gf-aee-feed-settings.php:269
+msgid "Webhook URL"
+msgstr "URL du webhook"
+
+#: includes/class-gf-aee-feed-settings.php:163
+#: includes/class-gf-aee-feed-settings.php:350
+msgid "Weeks"
+msgstr "Semaines"
+
+#: includes/class-gf-aee-feed-settings.php:429
+msgid "When enabled, the expiry rule will only apply when the conditions are met."
+msgstr "Lorsqu'activée, la règle d'expiration ne s'appliquera que si les conditions sont remplies."
+
+#: includes/class-gf-aee-addon.php:265
+msgid "When enabled, the expiry runner logs what it would do but takes no real action."
+msgstr "Lorsqu'activé, le moteur d'expiration enregistre ce qu'il ferait sans exécuter d'action réelle."
+
+#. translators: %s = date field label
+#: includes/class-gf-aee-addon.php:589
+msgid "When the \"%s\" date is reached,"
+msgstr "Lorsque la date « %s » est atteinte,"
+
+#. translators: %s = date source label
+#: includes/class-gf-aee-addon.php:570
+msgid "When the %s is reached,"
+msgstr "Lorsque la %s est atteinte,"
+
+#: includes/class-gf-aee-addon.php:662
+msgid ", "
+msgstr ", "
+
+#: gf-advanced-expiring-entries.php:132
+msgid "🐛 Report a Bug"
+msgstr "🐛 Signaler un bug"
+
+#: gf-advanced-expiring-entries.php:138
+msgid "🐛 Report a Bug (install Bug Reporter)"
+msgstr "🐛 Signaler un bug (installer Bug Reporter)"

@@ -1,0 +1,108 @@
+/**
+ * GF Advanced Expiring Entries — Admin styles.
+ */
+
+/* ── Badge system ─────────────────────────────────────────────────────── */
+.gf-aee-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+.gf-aee-badge--active,
+.gf-aee-badge--ok {
+	background: #e6f4ea;
+	color: #1e7e34;
+}
+
+.gf-aee-badge--expired {
+	background: #fce8e6;
+	color: #c5221f;
+}
+
+.gf-aee-badge--warning {
+	background: #fef7e0;
+	color: #e37400;
+}
+
+.gf-aee-badge--override,
+.gf-aee-badge--extended {
+	background: #fff3e0;
+	color: #e65100;
+}
+
+.gf-aee-badge--exempt,
+.gf-aee-badge--unknown {
+	background: #f1f3f4;
+	color: #5f6368;
+}
+
+/* ── Entry meta-box ───────────────────────────────────────────────────── */
+.gf-aee-entry-meta-box .inside {
+	padding: 8px 12px;
+}
+
+.gf-aee-meta-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.gf-aee-meta-table td {
+	padding: 4px 0;
+	vertical-align: top;
+}
+
+.gf-aee-meta-table td:first-child {
+	width: 80px;
+}
+
+/* ── Action log ───────────────────────────────────────────────────────── */
+.gf-aee-action-log {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.gf-aee-action-log li {
+	padding: 4px 0;
+	border-bottom: 1px solid #eee;
+}
+
+.gf-aee-action-log li:last-child {
+	border-bottom: none;
+}
+
+.gf-aee-log-icon {
+	display: inline-block;
+	width: 16px;
+	text-align: center;
+	margin-right: 4px;
+}
+
+/* ── Dashboard widget ─────────────────────────────────────────────────── */
+#gf_aee_dashboard_widget table {
+	margin-top: 0;
+}
+
+/* ── Misc ─────────────────────────────────────────────────────────────── */
+.gf-aee-datepicker {
+	width: 200px;
+}
+
+/* ── Feed summary panel ───────────────────────────────────────────────── */
+.gf-aee-feed-summary {
+	background: #f0f6fc;
+	border-left: 4px solid #2271b1;
+	padding: 12px 16px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #1d2327;
+}
+
+.gf-aee-feed-summary p {
+	margin: 0;
+}
