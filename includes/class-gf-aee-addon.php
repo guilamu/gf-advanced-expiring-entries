@@ -280,6 +280,9 @@ class GF_AEE_Addon extends GFFeedAddOn
         if (! empty($_POST['gf_aee_remove_override'])) {
             GF_AEE_Meta::remove_override($entry_id);
         }
+
+        // Bust dashboard widget cache after any meta change.
+        GF_AEE_Dashboard::invalidate_cache();
     }
 
     /* ─── Plugin Settings (Dry-run + Retroactive Tool) ────────────────── */

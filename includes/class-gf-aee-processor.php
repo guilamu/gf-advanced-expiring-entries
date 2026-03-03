@@ -137,6 +137,9 @@ class GF_AEE_Processor
         $feed_id  = rgar($feed, 'id');
         GF_AEE_Meta::set_expiry($entry_id, $expiry_ts, $feed_id);
 
+        // Bust dashboard widget cache so new counts show immediately.
+        GF_AEE_Dashboard::invalidate_cache();
+
         // Schedule pre-expiry notification if configured.
         if (rgar($meta, 'enable_pre_notification')) {
             $pre_value = absint(rgar($meta, 'pre_notify_value', 0));
