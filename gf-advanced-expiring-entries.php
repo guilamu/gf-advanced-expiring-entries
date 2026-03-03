@@ -5,7 +5,7 @@
  * Plugin URI:  https://github.com/guilamu/gf-advanced-expiring-entries
  * Description: Configure per-form expiration rules (feeds) for Gravity Forms entries. Supports fixed and dynamic expiry, multiple actions, pre-expiry notifications, and admin overrides.
  * Version: 1.0.0
- * Author: Guillaume
+ * Author: Guilamu
  * Author URI: https://github.com/guilamu
  * Text Domain: gf-advanced-expiring-entries
  * Domain Path: /languages
