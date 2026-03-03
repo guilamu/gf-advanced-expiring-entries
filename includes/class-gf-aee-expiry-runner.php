@@ -209,6 +209,9 @@ class GF_AEE_Expiry_Runner
             $success ? 'OK' : 'FAILED'
         ));
 
+        // Bust dashboard widget cache so new counts show immediately.
+        GF_AEE_Dashboard::invalidate_cache();
+
         /**
          * Fires after an expiry action completes.
          */

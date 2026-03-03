@@ -89,7 +89,7 @@ class GF_AEE_Dashboard
                 'form_title'    => rgar($form, 'title'),
                 'active'        => self::count_by_status($form_id, GF_AEE_Meta::STATUS_ACTIVE),
                 'expiring_soon' => self::count_expiring_soon($form_id),
-                'expired'       => self::count_by_status($form_id, GF_AEE_Meta::STATUS_EXPIRED),
+                'expired'       => self::count_by_status($form_id, GF_AEE_Meta::STATUS_EXPIRED, false),
             );
         }
 
@@ -99,13 +99,27 @@ class GF_AEE_Dashboard
     }
 
     /**
-     * Count entries with a specific AEE status for a form.
+     * Invalidate the dashboard transient cache.
      */
-    private static function count_by_status($form_id, $status)
+    public static function invalidate_cache()
+    {
+        delete_transient(self::TRANSIENT_KEY);
+    }
+
+    /**
+     * Count entries with a specific AEE status for a form.
+     *
+     * @param int    $form_id          Form ID.
+     * @param string $status           AEE meta status value.
+     * @param bool   $only_gf_active   If true, only count GF-active entries (default true).
+     */
+    private static function count_by_status($form_id, $status, $only_gf_active = true)
     {
         global $wpdb;
         $table = GFFormsModel::get_entry_meta_table_name();
         $entry_table = GFFormsModel::get_entry_table_name();
+
+        $gf_status_clause = $only_gf_active ? "AND e.status = 'active'" : '';
 
         // phpcs:disable WordPress.DB.PreparedSQL
         return (int) $wpdb->get_var($wpdb->prepare(
@@ -115,7 +129,7 @@ class GF_AEE_Dashboard
 			 WHERE em.meta_key = %s
 			   AND em.meta_value = %s
 			   AND e.form_id = %d
-			   AND e.status = 'active'",
+			   {$gf_status_clause}",
             GF_AEE_Meta::STATUS,
             $status,
             $form_id
