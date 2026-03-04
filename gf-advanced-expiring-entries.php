@@ -4,7 +4,7 @@
  * Plugin Name: GF Advanced Expiring Entries
  * Plugin URI:  https://github.com/guilamu/gf-advanced-expiring-entries
  * Description: Configure per-form expiration rules (feeds) for Gravity Forms entries. Supports fixed and dynamic expiry, multiple actions, pre-expiry notifications, and admin overrides.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Guilamu
  * Author URI: https://github.com/guilamu
  * Text Domain: gf-advanced-expiring-entries
@@ -23,17 +23,17 @@ if (! defined('GF_AEE_DEBUG')) {
     define('GF_AEE_DEBUG', false);
 }
 
-define('GF_AEE_VERSION', '1.0.1');
+define('GF_AEE_VERSION', '1.0.2');
 define('GF_AEE_PLUGIN_FILE', __FILE__);
 define('GF_AEE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('GF_AEE_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// GitHub auto-updater (runs outside GF bootstrap so updates work even if GF is deactivated).
-require_once GF_AEE_PLUGIN_DIR . 'includes/class-github-updater.php';
-
-// Load translations.
+// Load translations and GitHub auto-updater at init (avoids _load_textdomain_just_in_time warning in WP 6.7+).
 add_action('init', function () {
     load_plugin_textdomain('gf-advanced-expiring-entries', false, dirname(plugin_basename(__FILE__)) . '/languages');
+
+    // GitHub auto-updater (runs outside GF bootstrap so updates work even if GF is deactivated).
+    require_once GF_AEE_PLUGIN_DIR . 'includes/class-github-updater.php';
 });
 
 // Bootstrap: load after Gravity Forms is ready.

@@ -120,6 +120,9 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.0.2 - 2026-03-04
+- **Fixed:** Translation loading triggered too early warning on WordPress 6.7+ (`_load_textdomain_just_in_time`)
+
 ### 1.0.1 - 2026-03-03
 - **Improved:** Retroactive tool now shows a dropdown of feed names instead of requiring a raw Feed ID
 
