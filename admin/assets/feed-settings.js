@@ -256,9 +256,81 @@
         initRetroactiveFeedDropdown();
         initExpiryCheck();
         initFeedSummary();
+        initLogAjaxFilter();
 
         // Re-init datepickers after GF AJAX refreshes settings markup.
         $(document).on('gform_post_render', initDatepickers);
     });
+
+    /* ── Live log filtering (AJAX) ────────────────────────────────────── */
+    var logFilterTimer = null;
+
+    function loadLogResults(page) {
+        if (!strings || !strings.nonceFilterLog) return;
+
+        var $results = $('#gf-aee-log-results');
+        if (!$results.length) return;
+
+        var formId  = $('#gf-aee-log-form').val()    || '';
+        var action  = $('#gf-aee-log-action').val()   || '';
+        var success = $('#gf-aee-log-success').val()   || 'all';
+
+        $results.css('opacity', '0.5');
+
+        $.post(strings.ajaxurl, {
+            action: 'gf_aee_filter_log',
+            nonce: strings.nonceFilterLog,
+            form_id: formId,
+            action_filter: action,
+            success: success,
+            paged: page || 1,
+        }, function (response) {
+            $results.css('opacity', '1');
+            if (response.success) {
+                $results.html(response.data.html);
+            }
+        }).fail(function () {
+            $results.css('opacity', '1');
+        });
+
+        // Show/hide reset button.
+        var hasFilters = formId || action || success !== 'all';
+        $('#gf-aee-log-reset').toggle(!!hasFilters);
+    }
+
+    function scheduleLogFilter() {
+        if (logFilterTimer) clearTimeout(logFilterTimer);
+        logFilterTimer = setTimeout(function () {
+            loadLogResults(1);
+        }, 250);
+    }
+
+    function initLogAjaxFilter() {
+        if (!strings || !strings.nonceFilterLog) return;
+
+        var $wrap = $('.gf-aee-log-wrap');
+        if (!$wrap.length) return;
+
+        // Live filter on select change.
+        $wrap.on('change', '#gf-aee-log-form, #gf-aee-log-action, #gf-aee-log-success', scheduleLogFilter);
+
+        // Reset button.
+        $wrap.on('click', '#gf-aee-log-reset', function (e) {
+            e.preventDefault();
+            $('#gf-aee-log-form').val('');
+            $('#gf-aee-log-action').val('');
+            $('#gf-aee-log-success').val('all');
+            loadLogResults(1);
+        });
+
+        // AJAX pagination — intercept clicks inside the results container.
+        $(document).on('click', '#gf-aee-log-results .tablenav-pages a', function (e) {
+            e.preventDefault();
+            var href  = $(this).attr('href') || '';
+            var match = href.match(/paged=(\d+)/);
+            var page  = match ? parseInt(match[1], 10) : 1;
+            loadLogResults(page);
+        });
+    }
 
 })(jQuery);

@@ -1,6 +1,6 @@
 # GF Advanced Expiring Entries
 
-A Gravity Forms Feed Add-On that lets you create per-form expiration rules for entries. When an entry is submitted, the plugin computes an expiry timestamp and stores it as entry meta. A background job periodically checks for due entries and triggers the configured action.
+A Gravity Forms Feed Add-On that lets you create per-form expiration rules for entries. When an entry is submitted, the plugin computes an expiry timestamp and stores it as entry meta. A background job periodically checks for due entries and triggers the configured action. Pre-expiry and post-expiry notifications can be sent automatically.
 
 ![Plugin Screenshot](https://github.com/guilamu/gf-advanced-expiring-entries/blob/main/screenshot.png)
 
@@ -22,13 +22,14 @@ A Gravity Forms Feed Add-On that lets you create per-form expiration rules for e
 ## Key Features
 
 - **Pre-Expiry Notifications:** Send a GF notification minutes, hours, days, or weeks before an entry expires
+- **Post-Expiry Notifications:** Send a GF notification after a successful or failed expiry action, with configurable delay
 - **Per-Entry Overrides:** Admins can override, extend, or exempt individual entries from the entry detail sidebar
 - **Dashboard Widget:** At-a-glance summary of active, expiring-soon, and expired entries per form
 - **Dry-Run Mode:** Log every action without executing, for safe testing before going live
 - **Retroactive Tool:** Apply expiry rules to existing entries that pre-date plugin installation
 - **Conditional Logic:** Process feeds only when specific field conditions are met
 - **Live Feed Summary:** Real-time human-readable description of the feed rule as you configure it
-- **Expiry Log:** Full audit log of every action with filters by form, action type, and result
+- **Expiry Log:** Full audit log of every action with live AJAX filtering by form, action type, and result
 - **Self-Healing Cron:** Detects and recovers from stalled wp_cron events automatically
 - **Multilingual:** Works with content in any language
 - **Translation-Ready:** All strings are internationalized; French translation included
@@ -119,6 +120,13 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 ```
 
 ## Changelog
+
+### 1.1.0 - 2026-03-05
+- **New:** Post-Expiry Notifications — send a GF notification after a successful or failed expiry action, with configurable delay
+- **New:** Entry data snapshot for post-expiry notifications — merge tags resolve correctly even when the entry was trashed or deleted
+- **Improved:** Expiry Log now filters live via AJAX (removed the "Filter" button)
+- **Improved:** Retroactive tool dropdowns displayed inline on a single line without labels
+- **Improved:** Time and Unit fields displayed inline on a single line in all three notification panels
 
 ### 1.0.2 - 2026-03-04
 - **Fixed:** Translation loading triggered too early warning on WordPress 6.7+ (`_load_textdomain_just_in_time`)

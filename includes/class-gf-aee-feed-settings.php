@@ -27,6 +27,8 @@ class GF_AEE_Feed_Settings
             self::section_expiry_source($form),
             self::section_expiry_action($form),
             self::section_pre_notification($form),
+            self::section_post_notification_success($form),
+            self::section_post_notification_fail($form),
             self::section_empty_date_fallback(),
             self::section_conditional_logic(),
         );
@@ -351,28 +353,9 @@ class GF_AEE_Feed_Settings
                 ),
                 array(
                     'label'      => esc_html__('Time Before Expiry', 'gf-advanced-expiring-entries'),
-                    'type'       => 'text',
+                    'type'       => 'notify_delay',
                     'name'       => 'pre_notify_value',
-                    'class'      => 'small',
-                    'input_type' => 'number',
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'enable_pre_notification', 'values' => array('1')),
-                        ),
-                    ),
-                ),
-                array(
-                    'label'      => esc_html__('Unit', 'gf-advanced-expiring-entries'),
-                    'type'       => 'select',
-                    'name'       => 'pre_notify_unit',
-                    'choices'    => array(
-                        array('label' => esc_html__('Minutes', 'gf-advanced-expiring-entries'), 'value' => 'minutes'),
-                        array('label' => esc_html__('Hours', 'gf-advanced-expiring-entries'), 'value' => 'hours'),
-                        array('label' => esc_html__('Days',  'gf-advanced-expiring-entries'), 'value' => 'days'),
-                        array('label' => esc_html__('Weeks', 'gf-advanced-expiring-entries'), 'value' => 'weeks'),
-                    ),
-                    'default_value' => 'days',
+                    'unit_name'  => 'pre_notify_unit',
                     'dependency' => array(
                         'live'   => true,
                         'fields' => array(
@@ -389,6 +372,98 @@ class GF_AEE_Feed_Settings
                         'live'   => true,
                         'fields' => array(
                             array('field' => 'enable_pre_notification', 'values' => array('1')),
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /* ─── Section: Post-Expiry Notification on Success ─────────────────── */
+
+    private static function section_post_notification_success($form)
+    {
+
+        $notifications = self::get_notification_choices($form);
+
+        return array(
+            'title'  => esc_html__('Post-Expiry Notification on Successful Expiry Action', 'gf-advanced-expiring-entries'),
+            'fields' => array(
+                array(
+                    'label'   => esc_html__('Enable Post-Expiry Notification (Success)', 'gf-advanced-expiring-entries'),
+                    'type'    => 'checkbox',
+                    'name'    => 'enable_post_notification_success',
+                    'choices' => array(
+                        array('label' => esc_html__('Send a notification after a successful expiry action', 'gf-advanced-expiring-entries'), 'name' => 'enable_post_notification_success'),
+                    ),
+                ),
+                array(
+                    'label'      => esc_html__('Time After Expiry Action', 'gf-advanced-expiring-entries'),
+                    'type'       => 'notify_delay',
+                    'name'       => 'post_notify_success_value',
+                    'unit_name'  => 'post_notify_success_unit',
+                    'dependency' => array(
+                        'live'   => true,
+                        'fields' => array(
+                            array('field' => 'enable_post_notification_success', 'values' => array('1')),
+                        ),
+                    ),
+                ),
+                array(
+                    'label'      => esc_html__('Notification to Send', 'gf-advanced-expiring-entries'),
+                    'type'       => 'select',
+                    'name'       => 'post_notify_success_notification_id',
+                    'choices'    => $notifications,
+                    'dependency' => array(
+                        'live'   => true,
+                        'fields' => array(
+                            array('field' => 'enable_post_notification_success', 'values' => array('1')),
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /* ─── Section: Post-Expiry Notification on Fail ────────────────────── */
+
+    private static function section_post_notification_fail($form)
+    {
+
+        $notifications = self::get_notification_choices($form);
+
+        return array(
+            'title'  => esc_html__('Post-Expiry Notification on Failed Expiry Action', 'gf-advanced-expiring-entries'),
+            'fields' => array(
+                array(
+                    'label'   => esc_html__('Enable Post-Expiry Notification (Fail)', 'gf-advanced-expiring-entries'),
+                    'type'    => 'checkbox',
+                    'name'    => 'enable_post_notification_fail',
+                    'choices' => array(
+                        array('label' => esc_html__('Send a notification after a failed expiry action', 'gf-advanced-expiring-entries'), 'name' => 'enable_post_notification_fail'),
+                    ),
+                ),
+                array(
+                    'label'      => esc_html__('Time After Expiry Action', 'gf-advanced-expiring-entries'),
+                    'type'       => 'notify_delay',
+                    'name'       => 'post_notify_fail_value',
+                    'unit_name'  => 'post_notify_fail_unit',
+                    'dependency' => array(
+                        'live'   => true,
+                        'fields' => array(
+                            array('field' => 'enable_post_notification_fail', 'values' => array('1')),
+                        ),
+                    ),
+                ),
+                array(
+                    'label'      => esc_html__('Notification to Send', 'gf-advanced-expiring-entries'),
+                    'type'       => 'select',
+                    'name'       => 'post_notify_fail_notification_id',
+                    'choices'    => $notifications,
+                    'dependency' => array(
+                        'live'   => true,
+                        'fields' => array(
+                            array('field' => 'enable_post_notification_fail', 'values' => array('1')),
                         ),
                     ),
                 ),

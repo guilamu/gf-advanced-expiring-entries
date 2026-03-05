@@ -93,6 +93,25 @@
 	width: 200px;
 }
 
+/* ── Retroactive tool inline selects ──────────────────────────────────── */
+.gf-aee-retroactive-selects {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+/* ── Notification delay: number + unit on same line ───────────────────── */
+.gf-aee-notify-delay {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.gf-aee-notify-delay input[type="number"] {
+	width: 80px;
+}
+
 /* ── Feed summary panel ───────────────────────────────────────────────── */
 .gf-aee-feed-summary {
 	background: #f0f6fc;

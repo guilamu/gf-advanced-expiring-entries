@@ -15,6 +15,7 @@ class GF_AEE_Scheduler
 
     const HOOK_EXPIRY_CHECK      = 'gf_aee_run_expiry_check';
     const HOOK_PRE_NOTIFICATION  = 'gf_aee_send_pre_notification';
+    const HOOK_POST_NOTIFICATION = 'gf_aee_send_post_notification';
     const DEFAULT_INTERVAL       = 1 * MINUTE_IN_SECONDS;
 
     /**
@@ -57,6 +58,7 @@ class GF_AEE_Scheduler
         // 2. Register the listeners (must be in place before any cron fires).
         add_action(self::HOOK_EXPIRY_CHECK,     array(__CLASS__, 'run_expiry_check'));
         add_action(self::HOOK_PRE_NOTIFICATION, array(__CLASS__, 'run_pre_notification'), 10, 1);
+        add_action(self::HOOK_POST_NOTIFICATION, array(__CLASS__, 'run_post_notification'), 10, 2);
 
         // 3. Schedule or self-heal.
         $next = wp_next_scheduled(self::HOOK_EXPIRY_CHECK);
@@ -93,6 +95,18 @@ class GF_AEE_Scheduler
     public static function schedule_pre_notification($entry_id, $notify_ts)
     {
         wp_schedule_single_event($notify_ts, self::HOOK_PRE_NOTIFICATION, array((int) $entry_id));
+    }
+
+    /**
+     * Schedule a single post-expiry notification for one entry.
+     *
+     * @param int    $entry_id  Entry ID.
+     * @param int    $notify_ts Timestamp at which to send.
+     * @param string $type      'success' or 'fail'.
+     */
+    public static function schedule_post_notification($entry_id, $notify_ts, $type)
+    {
+        wp_schedule_single_event($notify_ts, self::HOOK_POST_NOTIFICATION, array((int) $entry_id, sanitize_key($type)));
     }
 
     /**
@@ -231,6 +245,72 @@ class GF_AEE_Scheduler
                     __('Notification %s sent.', 'gf-advanced-expiring-entries'),
                     $notification_id
                 ));
+            }
+        }
+    }
+
+    /**
+     * Fire a post-expiry notification for a single entry.
+     *
+     * @param int    $entry_id Entry ID.
+     * @param string $type     'success' or 'fail'.
+     */
+    public static function run_post_notification($entry_id, $type = 'success')
+    {
+
+        $entry_id = (int) $entry_id;
+        $type     = sanitize_key($type);
+
+        // Determine the meta key tracking whether this notification was already sent.
+        $notified_key = $type === 'fail'
+            ? GF_AEE_Meta::POST_NOTIFIED_FAIL
+            : GF_AEE_Meta::POST_NOTIFIED_SUCCESS;
+
+        if (GF_AEE_Meta::get($entry_id, $notified_key)) {
+            return;
+        }
+
+        $feed_id = GF_AEE_Meta::get($entry_id, GF_AEE_Meta::FEED_ID);
+        if (! $feed_id) {
+            return;
+        }
+
+        $addon = gf_aee();
+        $feed  = $addon ? $addon->get_feed($feed_id) : null;
+        if (! $feed) {
+            return;
+        }
+
+        $meta            = rgar($feed, 'meta');
+        $notification_id = rgar($meta, 'post_notify_' . $type . '_notification_id');
+        $form_id         = rgar($feed, 'form_id');
+
+        if ($notification_id && $form_id) {
+            $form  = GFAPI::get_form($form_id);
+            $entry = GFAPI::get_entry($entry_id);
+
+            // Fallback: if the entry was trashed/deleted, use the snapshot
+            // stored at scheduling time so merge tags still resolve.
+            if (is_wp_error($entry)) {
+                $snapshot = get_transient('gf_aee_post_snap_' . $entry_id);
+                if ($snapshot && is_array($snapshot)) {
+                    $entry = $snapshot;
+                }
+            }
+            // Clean up the transient regardless.
+            delete_transient('gf_aee_post_snap_' . $entry_id);
+
+            if (! is_wp_error($entry) && ! is_wp_error($form)) {
+                $notification = rgar(rgar($form, 'notifications', array()), $notification_id);
+                if ($notification) {
+                    GFCommon::send_notification($notification, $form, $entry);
+                    GF_AEE_Meta::set($entry_id, $notified_key, 1);
+                    GF_AEE_Meta::log_action($entry_id, 'post_notification_' . $type, true, sprintf(
+                        /* translators: %s = notification ID */
+                        __('Post-expiry notification (%s) sent.', 'gf-advanced-expiring-entries'),
+                        $type
+                    ));
+                }
             }
         }
     }

@@ -322,19 +322,8 @@ class GF_AEE_Addon extends GFFeedAddOn
                 'description' => esc_html__('Select a form and feed, then click "Run" to apply expiry rules to existing entries that do not yet have an expiry timestamp.', 'gf-advanced-expiring-entries'),
                 'fields'      => array(
                     array(
-                        'label'   => esc_html__('Form', 'gf-advanced-expiring-entries'),
-                        'type'    => 'select',
-                        'name'    => 'retroactive_form_id',
-                        'choices' => self::get_form_choices(),
-                    ),
-                    array(
-                        'label' => esc_html__('Feed', 'gf-advanced-expiring-entries'),
-                        'type'  => 'retroactive_feed_select',
-                        'name'  => 'retroactive_feed_id',
-                    ),
-                    array(
-                        'name' => 'retroactive_run_button',
-                        'type' => 'retroactive_button',
+                        'name' => 'retroactive_tool',
+                        'type' => 'retroactive_tool',
                     ),
                 ),
             ),
@@ -379,12 +368,23 @@ class GF_AEE_Addon extends GFFeedAddOn
     /* ─── Custom settings field renderers ──────────────────────────────── */
 
     /**
-     * Render the retroactive processing button (custom field type).
+     * Render the retroactive tool: form + feed selects inline, then button.
      */
-    public function settings_retroactive_button($field, $echo = true)
+    public function settings_retroactive_tool($field, $echo = true)
     {
+        $form_choices = self::get_form_choices();
         ob_start();
 ?>
+        <div class="gf-aee-retroactive-selects">
+            <select name="_gform_setting_retroactive_form_id" class="gform-input__select">
+                <?php foreach ($form_choices as $choice) : ?>
+                    <option value="<?php echo esc_attr($choice['value']); ?>"><?php echo esc_html($choice['label']); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select id="gf_aee_retroactive_feed_select" name="_gform_setting_retroactive_feed_id" class="gform-input__select">
+                <option value=""><?php esc_html_e('— Select a form first —', 'gf-advanced-expiring-entries'); ?></option>
+            </select>
+        </div>
         <div class="gf-aee-tool-action">
             <button type="button" class="button" id="gf_aee_run_retroactive">
                 <?php esc_html_e('Run Retroactive Processing', 'gf-advanced-expiring-entries'); ?>
@@ -394,23 +394,6 @@ class GF_AEE_Addon extends GFFeedAddOn
         </div>
         <?php
         $html = ob_get_clean();
-        if ($echo) {
-            echo $html;
-        }
-        return $html;
-    }
-
-    /**
-     * Render the retroactive feed select dropdown (custom field type).
-     *
-     * Outputs a <select> that starts empty and is populated via AJAX
-     * when the admin selects a form in the retroactive tool.
-     */
-    public function settings_retroactive_feed_select($field, $echo = true)
-    {
-        $html = '<select id="gf_aee_retroactive_feed_select" name="_gform_setting_retroactive_feed_id" class="gform-input__select">'
-            . '<option value="">' . esc_html__('— Select a form first —', 'gf-advanced-expiring-entries') . '</option>'
-            . '</select>';
         if ($echo) {
             echo $html;
         }
@@ -468,6 +451,49 @@ class GF_AEE_Addon extends GFFeedAddOn
         return $html;
     }
 
+    /**
+     * Render a combined number + unit select on one line (custom field type).
+     */
+    public function settings_notify_delay($field, $echo = true)
+    {
+        $value_name = rgar($field, 'name');
+        $unit_name  = rgar($field, 'unit_name', $value_name . '_unit');
+
+        $current_value = $this->get_setting($value_name, '');
+        $current_unit  = $this->get_setting($unit_name, 'days');
+
+        $units = array(
+            'minutes' => esc_html__('Minutes', 'gf-advanced-expiring-entries'),
+            'hours'   => esc_html__('Hours',   'gf-advanced-expiring-entries'),
+            'days'    => esc_html__('Days',    'gf-advanced-expiring-entries'),
+            'weeks'   => esc_html__('Weeks',   'gf-advanced-expiring-entries'),
+        );
+
+        ob_start();
+        ?>
+        <div class="gf-aee-notify-delay">
+            <input type="number"
+                   name="_gform_setting_<?php echo esc_attr($value_name); ?>"
+                   value="<?php echo esc_attr($current_value); ?>"
+                   class="gform-input__input small"
+                   min="0" />
+            <select name="_gform_setting_<?php echo esc_attr($unit_name); ?>"
+                    class="gform-input__select">
+                <?php foreach ($units as $val => $label) : ?>
+                    <option value="<?php echo esc_attr($val); ?>" <?php selected($current_unit, $val); ?>>
+                        <?php echo esc_html($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
+    }
+
     /* ─── Dry-run notice ──────────────────────────────────────────────── */
 
     public function maybe_show_dry_run_notice()
@@ -501,6 +527,7 @@ class GF_AEE_Addon extends GFFeedAddOn
         add_action('wp_ajax_gf_aee_run_expiry_check', array($this, 'ajax_run_expiry_check'));
         add_action('wp_ajax_gf_aee_feed_summary', array($this, 'ajax_feed_summary'));
         add_action('wp_ajax_gf_aee_get_feeds_for_form', array($this, 'ajax_get_feeds_for_form'));
+        add_action('wp_ajax_gf_aee_filter_log', array($this, 'ajax_filter_log'));
     }
 
     /**
@@ -593,6 +620,34 @@ class GF_AEE_Addon extends GFFeedAddOn
         }
 
         wp_send_json_success($result);
+    }
+
+    /**
+     * AJAX handler: filter the expiry log table.
+     */
+    public function ajax_filter_log()
+    {
+        check_ajax_referer('gf_aee_filter_log', 'nonce');
+
+        if (! current_user_can('manage_options')) {
+            wp_send_json_error(__('Unauthorized', 'gf-advanced-expiring-entries'));
+        }
+
+        $filters = array(
+            'form_id' => absint(rgpost('form_id')),
+            'action'  => sanitize_key(rgpost('action_filter')),
+            'success' => sanitize_key(rgpost('success')),
+        );
+        if (empty($filters['success'])) {
+            $filters['success'] = 'all';
+        }
+        $page_num = max(1, absint(rgpost('paged')));
+
+        ob_start();
+        GF_AEE_Log::render_results($filters, $page_num);
+        $html = ob_get_clean();
+
+        wp_send_json_success(array('html' => $html));
     }
 
     /**
@@ -867,6 +922,56 @@ class GF_AEE_Addon extends GFFeedAddOn
             }
         }
 
+        // ── 5. Post-expiry notifications ───────────────────────────────
+        $post_types = array(
+            'success' => __('successful', 'gf-advanced-expiring-entries'),
+            'fail'    => __('failed', 'gf-advanced-expiring-entries'),
+        );
+
+        foreach ($post_types as $post_type => $type_label) {
+            $post_enabled = ! empty($meta['enable_post_notification_' . $post_type]);
+            if (! $post_enabled) {
+                continue;
+            }
+
+            $post_value = absint(rgar($meta, 'post_notify_' . $post_type . '_value', 0));
+            $post_unit  = sanitize_key(rgar($meta, 'post_notify_' . $post_type . '_unit', 'minutes'));
+            $post_notif = rgar($meta, 'post_notify_' . $post_type . '_notification_id', '');
+            $post_label = '';
+
+            if ($post_notif && $form && ! empty($form['notifications'][$post_notif])) {
+                $post_label = rgar($form['notifications'][$post_notif], 'name');
+            }
+
+            if ($post_value > 0 && $post_label) {
+                $unit_noop = isset($unit_labels[$post_unit]) ? $unit_labels[$post_unit] : $unit_labels['hours'];
+                $unit_str  = sprintf(translate_nooped_plural($unit_noop, $post_value, 'gf-advanced-expiring-entries'), $post_value);
+                $parts[] = sprintf(
+                    /* translators: 1: notification name, 2: time offset, 3: "successful"/"failed" */
+                    __('"%1$s" notification is sent %2$s after a %3$s expiry action.', 'gf-advanced-expiring-entries'),
+                    $post_label,
+                    $unit_str,
+                    $type_label
+                );
+            } elseif ($post_value > 0) {
+                $unit_noop = isset($unit_labels[$post_unit]) ? $unit_labels[$post_unit] : $unit_labels['hours'];
+                $unit_str  = sprintf(translate_nooped_plural($unit_noop, $post_value, 'gf-advanced-expiring-entries'), $post_value);
+                $parts[] = sprintf(
+                    /* translators: 1: time offset, 2: "successful"/"failed" */
+                    __('A post-expiry notification is sent %1$s after a %2$s expiry action.', 'gf-advanced-expiring-entries'),
+                    $unit_str,
+                    $type_label
+                );
+            } elseif ($post_label) {
+                $parts[] = sprintf(
+                    /* translators: 1: notification name, 2: "successful"/"failed" */
+                    __('"%1$s" notification is sent immediately after a %2$s expiry action.', 'gf-advanced-expiring-entries'),
+                    $post_label,
+                    $type_label
+                );
+            }
+        }
+
         // Assemble with proper sentence joining.
         return implode(' ', $parts);
     }
@@ -911,6 +1016,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             $data['nonce']              = wp_create_nonce('gf_aee_retroactive');
             $data['nonceExpiryCheck']   = wp_create_nonce('gf_aee_expiry_check');
             $data['nonceGetFeeds']      = wp_create_nonce('gf_aee_get_feeds');
+            $data['nonceFilterLog']     = wp_create_nonce('gf_aee_filter_log');
             $data['selectFormFeed']     = __('Please select a form and a feed.', 'gf-advanced-expiring-entries');
             $data['selectFormFirst']    = __('— Select a form first —', 'gf-advanced-expiring-entries');
             $data['loadingFeeds']       = __('Loading…', 'gf-advanced-expiring-entries');

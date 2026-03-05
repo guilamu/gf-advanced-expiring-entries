@@ -18,6 +18,8 @@ class GF_AEE_Meta
     const OVERRIDE_TS      = '_gf_aee_override_ts';
     const NOTIFIED         = '_gf_aee_notified';
     const ACTION_LOG       = '_gf_aee_action_log';
+    const POST_NOTIFIED_SUCCESS = '_gf_aee_post_notified_success';
+    const POST_NOTIFIED_FAIL    = '_gf_aee_post_notified_fail';
 
     /* ── Status constants ─────────────────────────────────────────────── */
     const STATUS_ACTIVE    = 'active';

@@ -3,10 +3,10 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.0.2\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 00:00+0000\n"
-"PO-Revision-Date: 2026-03-04 18:31+0100\n"
+"POT-Creation-Date: 2026-03-05 00:00+0000\n"
+"PO-Revision-Date: 2026-03-05 10:56+0100\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -97,6 +97,11 @@ msgstr "[SIMULATION] L'action aurait été exécutée."
 #: includes/class-gf-aee-addon.php:693
 msgid "A pre-expiry notification is sent %s before the entry expires."
 msgstr "Une notification de pré-expiration est envoyée %s avant l'expiration de l'entrée."
+
+#. translators: %1$s = time offset, %2$s = "successful"/"failed"
+#: includes/class-gf-aee-addon.php:961
+msgid "A post-expiry notification is sent %1$s after a %2$s expiry action."
+msgstr "Une notification post-expiration est envoyée %1$s après une action d'expiration %2$s."
 
 #: includes/class-gf-aee-addon.php:618
 msgid "a field"
@@ -247,6 +252,14 @@ msgstr "Activer le mode simulation"
 #: includes/class-gf-aee-feed-settings.php:323
 msgid "Enable Pre-Expiry Notification"
 msgstr "Activer la notification de pré-expiration"
+
+#: includes/class-gf-aee-feed-settings.php:393
+msgid "Enable Post-Expiry Notification (Success)"
+msgstr "Activer la notification post-expiration (succès)"
+
+#: includes/class-gf-aee-feed-settings.php:439
+msgid "Enable Post-Expiry Notification (Fail)"
+msgstr "Activer la notification post-expiration (échec)"
 
 #: includes/class-gf-aee-feed-settings.php:183
 msgid "End of day (23:59)"
@@ -807,6 +820,50 @@ msgstr "Lorsque la %s est atteinte,"
 #: includes/class-gf-aee-addon.php:662
 msgid ", "
 msgstr ", "
+
+#: includes/class-gf-aee-addon.php:928
+msgid "failed"
+msgstr "échouée"
+
+#: includes/class-gf-aee-feed-settings.php:390
+msgid "Post-Expiry Notification on Successful Expiry Action"
+msgstr "Notification post-expiration en cas de succès de l'action"
+
+#: includes/class-gf-aee-feed-settings.php:436
+msgid "Post-Expiry Notification on Failed Expiry Action"
+msgstr "Notification post-expiration en cas d'échec de l'action"
+
+#. translators: %s = notification name
+#: includes/class-gf-aee-scheduler.php:310
+msgid "Post-expiry notification (%s) sent."
+msgstr "Notification post-expiration (%s) envoyée."
+
+#: includes/class-gf-aee-feed-settings.php:398
+msgid "Send a notification after a successful expiry action"
+msgstr "Envoyer une notification après une action d'expiration réussie"
+
+#: includes/class-gf-aee-feed-settings.php:444
+msgid "Send a notification after a failed expiry action"
+msgstr "Envoyer une notification après une action d'expiration échouée"
+
+#: includes/class-gf-aee-addon.php:927
+msgid "successful"
+msgstr "réussie"
+
+#: includes/class-gf-aee-feed-settings.php:401
+#: includes/class-gf-aee-feed-settings.php:447
+msgid "Time After Expiry Action"
+msgstr "Délai après l'action d'expiration"
+
+#. translators: 1: notification name, 2: time offset, 3: "successful"/"failed"
+#: includes/class-gf-aee-addon.php:951
+msgid "\"%1$s\" notification is sent %2$s after a %3$s expiry action."
+msgstr "La notification « %1$s » est envoyée %2$s après une action d'expiration %3$s."
+
+#. translators: 1: notification name, 2: "successful"/"failed"
+#: includes/class-gf-aee-addon.php:968
+msgid "\"%1$s\" notification is sent immediately after a %2$s expiry action."
+msgstr "La notification « %1$s » est envoyée immédiatement après une action d'expiration %2$s."
 
 #: gf-advanced-expiring-entries.php:132
 msgid "🐛 Report a Bug"

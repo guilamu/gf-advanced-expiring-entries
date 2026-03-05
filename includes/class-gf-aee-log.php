@@ -145,9 +145,9 @@ class GF_AEE_Log
     /* ── Admin page ─────────────────────────────────────────────────── */
 
     /**
-     * Render the log table.
+     * Render the log page (filters + results).
      *
-     * @param string $page_base_url  The base URL for this tab (used for filters & pagination).
+     * @param string $page_base_url  The base URL for this tab.
      */
     public static function render_page($page_base_url = '')
     {
@@ -157,7 +157,6 @@ class GF_AEE_Log
 
         $per_page = 50;
         $page_num = max(1, isset($_GET['paged']) ? absint($_GET['paged']) : 1); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $offset   = ($page_num - 1) * $per_page;
 
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $filters = array(
@@ -165,20 +164,6 @@ class GF_AEE_Log
             'action'  => isset($_GET['gf_aee_action'])  ? sanitize_key($_GET['gf_aee_action'])      : '',
             'success' => isset($_GET['gf_aee_success']) ? sanitize_key($_GET['gf_aee_success'])     : 'all',
         );
-
-        $total       = self::count_items($filters);
-        $items       = self::get_items($per_page, $offset, $filters);
-        $total_pages = max(1, (int) ceil($total / $per_page));
-
-        // Determine which entry IDs on this page still exist in GF (single IN query).
-        $existing_entry_ids = array();
-        if (! empty($items)) {
-            global $wpdb;
-            $ids          = array_unique(array_map('intval', wp_list_pluck($items, 'entry_id')));
-            $placeholders = implode(',', $ids);
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-            $existing_entry_ids = array_map('intval', $wpdb->get_col("SELECT id FROM {$wpdb->prefix}gf_entry WHERE id IN ({$placeholders})"));
-        }
 
         $forms = GFAPI::get_forms(true, false, 'title', 'ASC');
 
@@ -194,23 +179,7 @@ class GF_AEE_Log
             'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
         );
 
-        // Base URL with current filter args preserved for pagination.
-        $base_url = add_query_arg(
-            array_filter(array(
-                'gf_aee_form'    => $filters['form_id'] ? $filters['form_id'] : '',
-                'gf_aee_action'  => $filters['action'],
-                'gf_aee_success' => $filters['success'] !== 'all' ? $filters['success'] : '',
-            )),
-            $page_base_url
-        );
-
-        // Parse the base URL to carry its query args as hidden fields in the GET form.
-        $parsed     = wp_parse_url($page_base_url);
-        $form_action = esc_url(admin_url($parsed['path'] ?? 'admin.php'));
-        $base_args   = array();
-        if (! empty($parsed['query'])) {
-            wp_parse_str($parsed['query'], $base_args);
-        }
+        $has_filters = $filters['form_id'] || $filters['action'] || $filters['success'] !== 'all';
 
         ?>
         <style>
@@ -229,115 +198,149 @@ class GF_AEE_Log
         </style>
         <div class="gf-aee-log-wrap">
 
-            <form method="get" action="<?php echo $form_action; ?>">
-                <?php foreach ($base_args as $key => $val) : ?>
-                    <input type="hidden" name="<?php echo esc_attr($key); ?>" value="<?php echo esc_attr($val); ?>">
-                <?php endforeach; ?>
+            <div class="gf-aee-log-filters">
 
-                <div class="gf-aee-log-filters">
+                <select id="gf-aee-log-form">
+                    <option value=""><?php esc_html_e('All forms', 'gf-advanced-expiring-entries'); ?></option>
+                    <?php foreach ($forms as $form) : ?>
+                        <option value="<?php echo esc_attr($form['id']); ?>" <?php selected($filters['form_id'], $form['id']); ?>>
+                            <?php echo esc_html($form['title']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
-                        <select name="gf_aee_form">
-                            <option value=""><?php esc_html_e('All forms', 'gf-advanced-expiring-entries'); ?></option>
-                            <?php foreach ($forms as $form) : ?>
-                                <option value="<?php echo esc_attr($form['id']); ?>" <?php selected($filters['form_id'], $form['id']); ?>>
-                                    <?php echo esc_html($form['title']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                <select id="gf-aee-log-action">
+                    <option value=""><?php esc_html_e('All actions', 'gf-advanced-expiring-entries'); ?></option>
+                    <?php foreach ($action_slugs as $slug) : ?>
+                        <option value="<?php echo esc_attr($slug); ?>" <?php selected($filters['action'], $slug); ?>>
+                            <?php echo esc_html(isset($action_labels[$slug]) ? $action_labels[$slug] : ucfirst($slug)); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
-                        <select name="gf_aee_action">
-                            <option value=""><?php esc_html_e('All actions', 'gf-advanced-expiring-entries'); ?></option>
-                            <?php foreach ($action_slugs as $slug) : ?>
-                                <option value="<?php echo esc_attr($slug); ?>" <?php selected($filters['action'], $slug); ?>>
-                                    <?php echo esc_html(isset($action_labels[$slug]) ? $action_labels[$slug] : ucfirst($slug)); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                <select id="gf-aee-log-success">
+                    <option value="all"  <?php selected($filters['success'], 'all'); ?>><?php esc_html_e('Success + Failed', 'gf-advanced-expiring-entries'); ?></option>
+                    <option value="1"    <?php selected($filters['success'], '1');   ?>><?php esc_html_e('Success only', 'gf-advanced-expiring-entries'); ?></option>
+                    <option value="0"    <?php selected($filters['success'], '0');   ?>><?php esc_html_e('Failed only', 'gf-advanced-expiring-entries'); ?></option>
+                </select>
 
-                        <select name="gf_aee_success">
-                            <option value="all"  <?php selected($filters['success'], 'all'); ?>><?php esc_html_e('Success + Failed', 'gf-advanced-expiring-entries'); ?></option>
-                            <option value="1"    <?php selected($filters['success'], '1');   ?>><?php esc_html_e('Success only', 'gf-advanced-expiring-entries'); ?></option>
-                            <option value="0"    <?php selected($filters['success'], '0');   ?>><?php esc_html_e('Failed only', 'gf-advanced-expiring-entries'); ?></option>
-                        </select>
+                <a href="#" class="button" id="gf-aee-log-reset" style="<?php echo $has_filters ? '' : 'display:none;'; ?>"><?php esc_html_e('Reset', 'gf-advanced-expiring-entries'); ?></a>
 
-                        <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'gf-advanced-expiring-entries'); ?>">
+            </div><!-- .gf-aee-log-filters -->
 
-                        <?php if ($filters['form_id'] || $filters['action'] || $filters['success'] !== 'all') : ?>
-                            <a href="<?php echo esc_url($page_base_url); ?>" class="button"><?php esc_html_e('Reset', 'gf-advanced-expiring-entries'); ?></a>
-                        <?php endif; ?>
+            <div id="gf-aee-log-results">
+                <?php self::render_results($filters, $page_num, $per_page); ?>
+            </div>
 
-                </div><!-- .gf-aee-log-filters -->
-
-                <span class="gf-aee-count">
-                    <?php
-                    /* translators: %d = total number of log rows */
-                    printf(esc_html(_n('%d item', '%d items', $total, 'gf-advanced-expiring-entries')), (int) $total);
-                    ?>
-                </span>
-
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th style="width:165px"><?php esc_html_e('Date / Time', 'gf-advanced-expiring-entries'); ?></th>
-                            <th style="width:70px"><?php esc_html_e('Entry', 'gf-advanced-expiring-entries'); ?></th>
-                            <th style="width:70px"><?php esc_html_e('Form', 'gf-advanced-expiring-entries'); ?></th>
-                            <th style="width:70px"><?php esc_html_e('Feed', 'gf-advanced-expiring-entries'); ?></th>
-                            <th style="width:120px"><?php esc_html_e('Action', 'gf-advanced-expiring-entries'); ?></th>
-                            <th style="width:80px"><?php esc_html_e('Result', 'gf-advanced-expiring-entries'); ?></th>
-                            <th><?php esc_html_e('Message', 'gf-advanced-expiring-entries'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($items)) : ?>
-                            <tr>
-                                <td colspan="7"><?php esc_html_e('No log entries found.', 'gf-advanced-expiring-entries'); ?></td>
-                            </tr>
-                        <?php else : foreach ($items as $row) : ?>
-                            <tr>
-                                <td><?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($row['executed_at']))); ?></td>
-                                <td>
-                                    <?php
-                                    if (in_array((int) $row['entry_id'], $existing_entry_ids, true)) {
-                                        $entry_url = admin_url('admin.php?page=gf_entries&view=entry&id=' . $row['form_id'] . '&lid=' . $row['entry_id']);
-                                        echo '<a href="' . esc_url($entry_url) . '">#' . esc_html($row['entry_id']) . '</a>';
-                                    } else {
-                                        echo '#' . esc_html($row['entry_id']);
-                                    }
-                                    ?>
-                                </td>
-                                <td><?php echo esc_html($row['form_id']); ?></td>
-                                <td><?php echo esc_html($row['feed_id']); ?></td>
-                                <td><?php echo esc_html(isset($action_labels[$row['action']]) ? $action_labels[$row['action']] : $row['action']); ?></td>
-                                <td>
-                                    <?php if ($row['success']) : ?>
-                                        <span style="color:#00a32a">&#10003; <?php esc_html_e('OK', 'gf-advanced-expiring-entries'); ?></span>
-                                    <?php else : ?>
-                                        <span style="color:#d63638">&#10007; <?php esc_html_e('Fail', 'gf-advanced-expiring-entries'); ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo esc_html($row['message']); ?></td>
-                            </tr>
-                        <?php endforeach; endif; ?>
-                    </tbody>
-                </table>
-
-                <?php if ($total_pages > 1) : ?>
-                    <div class="tablenav bottom">
-                        <div class="tablenav-pages">
-                            <?php
-                            echo wp_kses_post(paginate_links(array(
-                                'base'    => add_query_arg('paged', '%#%', $base_url),
-                                'format'  => '',
-                                'current' => $page_num,
-                                'total'   => $total_pages,
-                            )));
-                            ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-            </form>
         </div><!-- .gf-aee-log-wrap -->
+        <?php
+    }
+
+    /**
+     * Render the log results (count + table + pagination).
+     *
+     * Used by render_page() for the initial load and by the AJAX handler
+     * for live filtering.
+     *
+     * @param array $filters   {form_id, action, success}.
+     * @param int   $page_num  Current page (1-based).
+     * @param int   $per_page  Items per page.
+     */
+    public static function render_results($filters = array(), $page_num = 1, $per_page = 50)
+    {
+        $offset      = ($page_num - 1) * $per_page;
+        $total       = self::count_items($filters);
+        $items       = self::get_items($per_page, $offset, $filters);
+        $total_pages = max(1, (int) ceil($total / $per_page));
+
+        // Determine which entry IDs on this page still exist in GF (single IN query).
+        $existing_entry_ids = array();
+        if (! empty($items)) {
+            global $wpdb;
+            $ids          = array_unique(array_map('intval', wp_list_pluck($items, 'entry_id')));
+            $placeholders = implode(',', $ids);
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $existing_entry_ids = array_map('intval', $wpdb->get_col("SELECT id FROM {$wpdb->prefix}gf_entry WHERE id IN ({$placeholders})"));
+        }
+
+        $action_labels = array(
+            'trash'         => __('Trash', 'gf-advanced-expiring-entries'),
+            'delete'        => __('Delete', 'gf-advanced-expiring-entries'),
+            'change_status' => __('Change Status', 'gf-advanced-expiring-entries'),
+            'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
+            'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
+            'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
+        );
+
+        ?>
+        <span class="gf-aee-count">
+            <?php
+            /* translators: %d = total number of log rows */
+            printf(esc_html(_n('%d item', '%d items', $total, 'gf-advanced-expiring-entries')), (int) $total);
+            ?>
+        </span>
+
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th style="width:165px"><?php esc_html_e('Date / Time', 'gf-advanced-expiring-entries'); ?></th>
+                    <th style="width:70px"><?php esc_html_e('Entry', 'gf-advanced-expiring-entries'); ?></th>
+                    <th style="width:70px"><?php esc_html_e('Form', 'gf-advanced-expiring-entries'); ?></th>
+                    <th style="width:70px"><?php esc_html_e('Feed', 'gf-advanced-expiring-entries'); ?></th>
+                    <th style="width:120px"><?php esc_html_e('Action', 'gf-advanced-expiring-entries'); ?></th>
+                    <th style="width:80px"><?php esc_html_e('Result', 'gf-advanced-expiring-entries'); ?></th>
+                    <th><?php esc_html_e('Message', 'gf-advanced-expiring-entries'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($items)) : ?>
+                    <tr>
+                        <td colspan="7"><?php esc_html_e('No log entries found.', 'gf-advanced-expiring-entries'); ?></td>
+                    </tr>
+                <?php else : foreach ($items as $row) : ?>
+                    <tr>
+                        <td><?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($row['executed_at']))); ?></td>
+                        <td>
+                            <?php
+                            if (in_array((int) $row['entry_id'], $existing_entry_ids, true)) {
+                                $entry_url = admin_url('admin.php?page=gf_entries&view=entry&id=' . $row['form_id'] . '&lid=' . $row['entry_id']);
+                                echo '<a href="' . esc_url($entry_url) . '">#' . esc_html($row['entry_id']) . '</a>';
+                            } else {
+                                echo '#' . esc_html($row['entry_id']);
+                            }
+                            ?>
+                        </td>
+                        <td><?php echo esc_html($row['form_id']); ?></td>
+                        <td><?php echo esc_html($row['feed_id']); ?></td>
+                        <td><?php echo esc_html(isset($action_labels[$row['action']]) ? $action_labels[$row['action']] : $row['action']); ?></td>
+                        <td>
+                            <?php if ($row['success']) : ?>
+                                <span style="color:#00a32a">&#10003; <?php esc_html_e('OK', 'gf-advanced-expiring-entries'); ?></span>
+                            <?php else : ?>
+                                <span style="color:#d63638">&#10007; <?php esc_html_e('Fail', 'gf-advanced-expiring-entries'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?php echo esc_html($row['message']); ?></td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+
+        <?php if ($total_pages > 1) : ?>
+            <div class="tablenav bottom">
+                <div class="tablenav-pages">
+                    <?php
+                    echo wp_kses_post(paginate_links(array(
+                        'base'    => add_query_arg('paged', '%#%'),
+                        'format'  => '',
+                        'current' => $page_num,
+                        'total'   => $total_pages,
+                    )));
+                    ?>
+                </div>
+            </div>
+        <?php endif; ?>
         <?php
     }
 }

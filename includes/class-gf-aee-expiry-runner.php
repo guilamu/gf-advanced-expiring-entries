@@ -212,10 +212,56 @@ class GF_AEE_Expiry_Runner
         // Bust dashboard widget cache so new counts show immediately.
         GF_AEE_Dashboard::invalidate_cache();
 
+        // Schedule post-expiry notifications if configured.
+        self::maybe_schedule_post_notification($entry_id, $feed, $success, $entry);
+
         /**
          * Fires after an expiry action completes.
          */
         do_action('gf_aee_after_expiry_action', $entry_id, $action, $feed, $success);
+    }
+
+	/* ─── Post-expiry notification scheduling ─────────────────────────── */
+
+    /**
+     * Schedule a post-expiry notification if configured for the result type.
+     *
+     * @param int   $entry_id Entry ID.
+     * @param array $feed     Feed configuration.
+     * @param bool  $success  Whether the expiry action succeeded.
+     * @param array $entry    The entry data captured before the action ran.
+     */
+    private static function maybe_schedule_post_notification($entry_id, $feed, $success, $entry)
+    {
+        $meta = rgar($feed, 'meta');
+        $type = $success ? 'success' : 'fail';
+
+        $enabled_key  = 'enable_post_notification_' . $type;
+        $value_key    = 'post_notify_' . $type . '_value';
+        $unit_key     = 'post_notify_' . $type . '_unit';
+
+        if (empty($meta[$enabled_key])) {
+            return;
+        }
+
+        $delay_value = absint(rgar($meta, $value_key, 0));
+        $delay_unit  = rgar($meta, $unit_key, 'minutes');
+
+        // If delay is 0, send immediately (schedule for now).
+        $notify_ts = $delay_value > 0
+            ? GF_AEE_Processor::apply_offset(time(), '+', $delay_value, $delay_unit)
+            : time();
+
+        // For destructive actions (trash/delete) the entry may be gone when the
+        // cron fires, so snapshot the pre-action entry data so merge tags in the
+        // notification can still be resolved.
+        $action = rgar($meta, 'expiry_action', '');
+        if (in_array($action, array('trash', 'delete'), true) && is_array($entry)) {
+            $ttl = max(($notify_ts - time()) + HOUR_IN_SECONDS, HOUR_IN_SECONDS);
+            set_transient('gf_aee_post_snap_' . $entry_id, $entry, $ttl);
+        }
+
+        GF_AEE_Scheduler::schedule_post_notification($entry_id, $notify_ts, $type);
     }
 
 	/* ─── Deleted entries backup table ────────────────────────────────── */
