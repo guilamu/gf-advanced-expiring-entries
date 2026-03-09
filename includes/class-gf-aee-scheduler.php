@@ -326,11 +326,7 @@ class GF_AEE_Scheduler
             $interval = self::get_interval();
             $schedules['gf_aee_check_interval'] = array(
                 'interval' => $interval,
-                'display'  => sprintf(
-                    /* translators: %d = number of minutes */
-                    esc_html__('Every %d minute(s) (GF AEE)', 'gf-advanced-expiring-entries'),
-                    round($interval / MINUTE_IN_SECONDS)
-                ),
+                'display'  => sprintf('Every %d minute(s) (GF AEE)', round($interval / MINUTE_IN_SECONDS)),
             );
         }
         return $schedules;

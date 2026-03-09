@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.1.0\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-05 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -307,11 +307,6 @@ msgstr ""
 
 #: includes/class-gf-aee-addon.php:515
 msgid "Error: "
-msgstr ""
-
-#. translators: %d = number of minutes
-#: includes/class-gf-aee-scheduler.php:217
-msgid "Every %d minute(s) (GF AEE)"
 msgstr ""
 
 #: admin/views/entry-meta-box.php:20

@@ -3,10 +3,10 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.1.0\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-05 00:00+0000\n"
-"PO-Revision-Date: 2026-03-05 10:56+0100\n"
+"PO-Revision-Date: 2026-03-09 09:54+0100\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.8\n"
 "X-Domain: gf-advanced-expiring-entries\n"
 
 #. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = field label
@@ -308,11 +308,6 @@ msgstr "date de dernière mise à jour de l'entrée"
 #: includes/class-gf-aee-addon.php:515
 msgid "Error: "
 msgstr "Erreur : "
-
-#. translators: %d = number of minutes
-#: includes/class-gf-aee-scheduler.php:217
-msgid "Every %d minute(s) (GF AEE)"
-msgstr "Toutes les %d minute(s) (GF AEE)"
 
 #: admin/views/entry-meta-box.php:20 includes/class-gf-aee-addon.php:176
 msgid "Exempt"

@@ -121,6 +121,10 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.1.1 - 2026-03-09
+- **Fixed:** WordPress 6.7+ "Translation loading triggered too early" warning caused by `esc_html__()` in the `cron_schedules` filter
+- **Fixed:** PHP "Undefined property: stdClass::$slug" warning on update-core.php — added missing `id`, `slug`, `plugin`, and `new_version` fields to the GitHub updater response
+
 ### 1.1.0 - 2026-03-05
 - **New:** Post-Expiry Notifications — send a GF notification after a successful or failed expiry action, with configurable delay
 - **New:** Entry data snapshot for post-expiry notifications — merge tags resolve correctly even when the entry was trashed or deleted
