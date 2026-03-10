@@ -147,7 +147,10 @@ class GF_AEE_Processor
 
             if ($pre_value > 0) {
                 $notify_ts = self::apply_offset($expiry_ts, '-', $pre_value, $pre_unit);
-                GF_AEE_Scheduler::schedule_pre_notification($entry_id, $notify_ts);
+                // Only schedule if the notification date is still in the future.
+                if ($notify_ts > time()) {
+                    GF_AEE_Scheduler::schedule_pre_notification($entry_id, $notify_ts);
+                }
             }
         }
     }

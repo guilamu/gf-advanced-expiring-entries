@@ -121,6 +121,12 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.1.2 - 2026-03-10
+- **Fixed:** Pre-expiry notifications could be sent after the entry had already expired when the notification timestamp was in the past (e.g. retroactive processing or short remaining time)
+- **Fixed:** Setting a manual override date did not reschedule the pre-expiry notification for the new date
+- **Fixed:** Dashboard widget did not count entries with a manual override (extended status) in Active and Expiring Soon totals
+- **Fixed:** Uninstall cleanup was incomplete — now removes post-notification meta keys, single-fire cron events, and entry snapshot transients
+
 ### 1.1.1 - 2026-03-09
 - **Fixed:** WordPress 6.7+ "Translation loading triggered too early" warning caused by `esc_html__()` in the `cron_schedules` filter
 - **Fixed:** PHP "Undefined property: stdClass::$slug" warning on update-core.php — added missing `id`, `slug`, `plugin`, and `new_version` fields to the GitHub updater response

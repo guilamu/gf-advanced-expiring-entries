@@ -273,6 +273,28 @@ class GF_AEE_Addon extends GFFeedAddOn
             $override_ts = strtotime(sanitize_text_field(wp_unslash($_POST['gf_aee_override_date'])));
             if ($override_ts) {
                 GF_AEE_Meta::set_override($entry_id, $override_ts);
+
+                // Reschedule pre-expiry notification for the new override date.
+                wp_clear_scheduled_hook(GF_AEE_Scheduler::HOOK_PRE_NOTIFICATION, array((int) $entry_id));
+                GF_AEE_Meta::set($entry_id, GF_AEE_Meta::NOTIFIED, 0);
+
+                $feed_id = GF_AEE_Meta::get($entry_id, GF_AEE_Meta::FEED_ID);
+                if ($feed_id) {
+                    $feed = $this->get_feed($feed_id);
+                    if ($feed) {
+                        $meta = rgar($feed, 'meta');
+                        if (rgar($meta, 'enable_pre_notification')) {
+                            $pre_value = absint(rgar($meta, 'pre_notify_value', 0));
+                            $pre_unit  = rgar($meta, 'pre_notify_unit', 'days');
+                            if ($pre_value > 0) {
+                                $notify_ts = GF_AEE_Processor::apply_offset($override_ts, '-', $pre_value, $pre_unit);
+                                if ($notify_ts > time()) {
+                                    GF_AEE_Scheduler::schedule_pre_notification($entry_id, $notify_ts);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

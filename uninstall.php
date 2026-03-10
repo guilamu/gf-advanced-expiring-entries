@@ -29,6 +29,8 @@ $meta_keys = array(
     '_gf_aee_override_ts',
     '_gf_aee_notified',
     '_gf_aee_action_log',
+    '_gf_aee_post_notified_success',
+    '_gf_aee_post_notified_fail',
 );
 
 $meta_table = $wpdb->prefix . 'gf_entry_meta';
@@ -40,11 +42,16 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === 
 
 // ── 4. Clear scheduled cron events ───────────────────────────────────────
 wp_clear_scheduled_hook( 'gf_aee_run_expiry_check' );
+wp_unschedule_all( 'gf_aee_send_pre_notification' );
+wp_unschedule_all( 'gf_aee_send_post_notification' );
 
 // ── 5. Remove transients ─────────────────────────────────────────────────
 delete_transient( 'gf_aee_expiry_lock' );
 delete_transient( 'gf_aee_dashboard_data' );
 delete_transient( 'gf_aee_github_release' );
+
+// Clean up per-entry post-expiry snapshot transients.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_gf_aee_post_snap_%' OR option_name LIKE '_transient_timeout_gf_aee_post_snap_%'" );
 
 // ── 6. Remove GF feed data ──────────────────────────────────────────────
 // GF stores feeds in the gf_addon_feed table; remove rows for our addon slug.

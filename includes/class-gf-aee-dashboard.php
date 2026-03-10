@@ -85,9 +85,12 @@ class GF_AEE_Dashboard
                 continue; // only show forms that have at least one AEE feed.
             }
 
+            $active_count   = self::count_by_status($form_id, GF_AEE_Meta::STATUS_ACTIVE)
+                            + self::count_by_status($form_id, GF_AEE_Meta::STATUS_EXTENDED);
+
             $data[] = array(
                 'form_title'    => rgar($form, 'title'),
-                'active'        => self::count_by_status($form_id, GF_AEE_Meta::STATUS_ACTIVE),
+                'active'        => $active_count,
                 'expiring_soon' => self::count_expiring_soon($form_id),
                 'expired'       => self::count_by_status($form_id, GF_AEE_Meta::STATUS_EXPIRED, false),
             );
@@ -155,20 +158,35 @@ class GF_AEE_Dashboard
 			 INNER JOIN {$table} AS em_st
 			   ON em_ts.entry_id = em_st.entry_id
 			   AND em_st.meta_key = %s
-			   AND em_st.meta_value = %s
 			 INNER JOIN {$entry_table} AS e
 			   ON em_ts.entry_id = e.id
-			 WHERE em_ts.meta_key = %s
-			   AND CAST( em_ts.meta_value AS UNSIGNED ) > %d
-			   AND CAST( em_ts.meta_value AS UNSIGNED ) <= %d
-			   AND e.form_id = %d
-			   AND e.status = 'active'",
+			 WHERE e.form_id = %d
+			   AND e.status = 'active'
+			   AND (
+			     (
+			       em_st.meta_value = %s
+			       AND em_ts.meta_key = %s
+			       AND CAST( em_ts.meta_value AS UNSIGNED ) > %d
+			       AND CAST( em_ts.meta_value AS UNSIGNED ) <= %d
+			     )
+			     OR
+			     (
+			       em_st.meta_value = %s
+			       AND em_ts.meta_key = %s
+			       AND CAST( em_ts.meta_value AS UNSIGNED ) > %d
+			       AND CAST( em_ts.meta_value AS UNSIGNED ) <= %d
+			     )
+			   )",
             GF_AEE_Meta::STATUS,
+            $form_id,
             GF_AEE_Meta::STATUS_ACTIVE,
             GF_AEE_Meta::EXPIRY_TS,
             $now,
             $seven_days,
-            $form_id
+            GF_AEE_Meta::STATUS_EXTENDED,
+            GF_AEE_Meta::OVERRIDE_TS,
+            $now,
+            $seven_days
         ));
         // phpcs:enable
     }
