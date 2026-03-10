@@ -24,6 +24,18 @@ class GF_AEE_Addon extends GFFeedAddOn
     protected $_url                      = '';
     protected $_supports_feed_ordering   = true;
 
+    /**
+     * Capabilities required by GF to display menus and settings.
+     *
+     * Without these, the Members plugin (or any plugin filtering user_has_cap)
+     * may deny access because GF looks up capabilities dynamically and
+     * undeclared caps can be treated as non-existent.
+     */
+    protected $_capabilities             = array( 'gravityforms_edit_forms' );
+    protected $_capabilities_settings_page = array( 'gravityforms_edit_forms' );
+    protected $_capabilities_form_settings = array( 'gravityforms_edit_forms' );
+    protected $_capabilities_uninstall     = array( 'gravityforms_uninstall' );
+
     private static $_instance = null;
 
     /* ─── Singleton ───────────────────────────────────────────────────── */
