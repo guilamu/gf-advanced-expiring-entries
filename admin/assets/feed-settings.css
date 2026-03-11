@@ -126,15 +126,15 @@
 	margin: 0;
 }
 
-/* ── Offset inline: direction + value + unit on one row ───────────────── */
-.gf-aee-offset-inline {
+/* ── Timing inline: Expire At + direction + value + unit on one row ──── */
+.gf-aee-timing-inline {
 	display: flex;
 	gap: 6px;
 	align-items: center;
 }
 
-.gf-aee-offset-inline > select,
-.gf-aee-offset-inline > input {
+.gf-aee-timing-inline > select,
+.gf-aee-timing-inline > input {
 	flex: 1 1 0;
 	min-width: 0;
 }

@@ -120,22 +120,11 @@ class GF_AEE_Feed_Settings
                     ),
                     'default_value' => 'date_created',
                 ),
-                // Expire At — specific time of day.
+                // Expire At + Offset — combined on a single line.
                 array(
-                    'label'         => esc_html__('Expire At', 'gf-advanced-expiring-entries'),
-                    'type'          => 'select',
-                    'name'          => 'expiry_time',
-                    'choices'       => self::get_time_choices(),
-                    'default_value' => '',
-                ),
-                // Offset – inline direction + value + unit (enabled by default).
-                array(
-                    'label'      => esc_html__('Offset', 'gf-advanced-expiring-entries'),
-                    'type'       => 'offset_inline',
-                    'name'       => 'offset_value',
-                    'dir_name'   => 'offset_direction',
-                    'unit_name'  => 'offset_unit',
-                    'default_value' => '0',
+                    'label'      => esc_html__('Timing', 'gf-advanced-expiring-entries'),
+                    'type'       => 'expiry_timing',
+                    'name'       => 'expiry_time',
                 ),
             ),
         );
@@ -430,22 +419,6 @@ class GF_AEE_Feed_Settings
     }
 
 	/* ─── Helpers ──────────────────────────────────────────────────────── */
-
-    /**
-     * Build hourly time-of-day choices for the "Expire At" select.
-     */
-    private static function get_time_choices()
-    {
-        $choices = array(
-            array('label' => '— ' . esc_html__('No specific time', 'gf-advanced-expiring-entries') . ' —', 'value' => ''),
-        );
-        for ($h = 0; $h < 24; $h++) {
-            $time      = sprintf('%02d:00', $h);
-            $choices[] = array('label' => $time, 'value' => $time);
-        }
-        $choices[] = array('label' => '23:59', 'value' => '23:59');
-        return $choices;
-    }
 
     /**
      * Build choices array from all date-type fields in a form.

@@ -533,15 +533,15 @@ class GF_AEE_Addon extends GFFeedAddOn
     /**
      * Render inline offset: direction + value + unit on one line (custom field type).
      */
-    public function settings_offset_inline($field, $echo = true)
+    /**
+     * Render the combined "Expire At" + "Offset" timing row.
+     */
+    public function settings_expiry_timing($field, $echo = true)
     {
-        $value_name = rgar($field, 'name');
-        $dir_name   = rgar($field, 'dir_name', 'offset_direction');
-        $unit_name  = rgar($field, 'unit_name', 'offset_unit');
-
-        $current_value = $this->get_setting($value_name, '0');
-        $current_dir   = $this->get_setting($dir_name, '+');
-        $current_unit  = $this->get_setting($unit_name, 'minutes');
+        $current_time  = $this->get_setting('expiry_time', '');
+        $current_dir   = $this->get_setting('offset_direction', '+');
+        $current_value = $this->get_setting('offset_value', '0');
+        $current_unit  = $this->get_setting('offset_unit', 'minutes');
 
         $units = array(
             'minutes' => esc_html__('Minutes', 'gf-advanced-expiring-entries'),
@@ -553,19 +553,25 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         ob_start();
         ?>
-        <div class="gf-aee-offset-inline">
-            <select name="_gform_setting_<?php echo esc_attr($dir_name); ?>"
-                    class="gform-input__select">
+        <div class="gf-aee-timing-inline">
+            <select name="_gform_setting_expiry_time" class="gform-input__select">
+                <option value="" <?php selected($current_time, ''); ?>>— <?php esc_html_e('No specific time', 'gf-advanced-expiring-entries'); ?> —</option>
+                <?php for ($h = 0; $h < 24; $h++) :
+                    $t = sprintf('%02d:00', $h); ?>
+                    <option value="<?php echo esc_attr($t); ?>" <?php selected($current_time, $t); ?>><?php echo esc_html($t); ?></option>
+                <?php endfor; ?>
+                <option value="23:59" <?php selected($current_time, '23:59'); ?>>23:59</option>
+            </select>
+            <select name="_gform_setting_offset_direction" class="gform-input__select">
                 <option value="+" <?php selected($current_dir, '+'); ?>>+</option>
                 <option value="-" <?php selected($current_dir, '-'); ?>>−</option>
             </select>
             <input type="number"
-                   name="_gform_setting_<?php echo esc_attr($value_name); ?>"
+                   name="_gform_setting_offset_value"
                    value="<?php echo esc_attr($current_value); ?>"
                    class="gform-input__input small"
                    min="0" />
-            <select name="_gform_setting_<?php echo esc_attr($unit_name); ?>"
-                    class="gform-input__select">
+            <select name="_gform_setting_offset_unit" class="gform-input__select">
                 <?php foreach ($units as $val => $label) : ?>
                     <option value="<?php echo esc_attr($val); ?>" <?php selected($current_unit, $val); ?>>
                         <?php echo esc_html($label); ?>

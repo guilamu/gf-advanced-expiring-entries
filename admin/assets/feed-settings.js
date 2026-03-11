@@ -291,13 +291,20 @@
             fixed_expiry_date: type === 'fixed',
             date_field_id:     type === 'dynamic',
             entry_meta_source: type === 'entry_meta',
-            offset_value:      type === 'dynamic' || type === 'entry_meta',
             expiry_time:       true
         };
 
         $.each(show, function (fieldName, visible) {
             getSettingRow(fieldName)[visible ? 'show' : 'hide']();
         });
+
+        // Auto-select the only date field when switching to dynamic.
+        if (type === 'dynamic') {
+            var $sel = $('[name="_gform_setting_date_field_id"]');
+            if ($sel.length && !$sel.val() && $sel.find('option').length === 2) {
+                $sel.val($sel.find('option').last().val()).trigger('change');
+            }
+        }
     }
 
     /**
