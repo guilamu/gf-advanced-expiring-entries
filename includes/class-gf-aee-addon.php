@@ -528,6 +528,98 @@ class GF_AEE_Addon extends GFFeedAddOn
         return $html;
     }
 
+    /**
+     * Render inline offset: direction + value + unit on one line (custom field type).
+     */
+    public function settings_offset_inline($field, $echo = true)
+    {
+        $value_name = rgar($field, 'name');
+        $dir_name   = rgar($field, 'dir_name', 'offset_direction');
+        $unit_name  = rgar($field, 'unit_name', 'offset_unit');
+
+        $current_value = $this->get_setting($value_name, '');
+        $current_dir   = $this->get_setting($dir_name, '+');
+        $current_unit  = $this->get_setting($unit_name, 'days');
+
+        $units = array(
+            'minutes' => esc_html__('Minutes', 'gf-advanced-expiring-entries'),
+            'hours'   => esc_html__('Hours',   'gf-advanced-expiring-entries'),
+            'days'    => esc_html__('Days',    'gf-advanced-expiring-entries'),
+            'weeks'   => esc_html__('Weeks',   'gf-advanced-expiring-entries'),
+            'months'  => esc_html__('Months',  'gf-advanced-expiring-entries'),
+        );
+
+        ob_start();
+        ?>
+        <div class="gf-aee-offset-inline">
+            <select name="_gform_setting_<?php echo esc_attr($dir_name); ?>"
+                    class="gform-input__select">
+                <option value="+" <?php selected($current_dir, '+'); ?>>+</option>
+                <option value="-" <?php selected($current_dir, '-'); ?>>−</option>
+            </select>
+            <input type="number"
+                   name="_gform_setting_<?php echo esc_attr($value_name); ?>"
+                   value="<?php echo esc_attr($current_value); ?>"
+                   class="gform-input__input small"
+                   min="0" />
+            <select name="_gform_setting_<?php echo esc_attr($unit_name); ?>"
+                    class="gform-input__select">
+                <?php foreach ($units as $val => $label) : ?>
+                    <option value="<?php echo esc_attr($val); ?>" <?php selected($current_unit, $val); ?>>
+                        <?php echo esc_html($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
+    }
+
+    /**
+     * Render the advanced source options toggle (wraps Snap To).
+     */
+    public function settings_advanced_source_options($field, $echo = true)
+    {
+        $snap_value = $this->get_setting('snap_to', '');
+
+        $snap_choices = array(
+            ''      => esc_html__('No snap', 'gf-advanced-expiring-entries'),
+            'start' => esc_html__('Start of day (00:00)', 'gf-advanced-expiring-entries'),
+            'end'   => esc_html__('End of day (23:59)', 'gf-advanced-expiring-entries'),
+        );
+
+        ob_start();
+        ?>
+        <div class="gf-aee-advanced-toggle">
+            <a href="#" class="gf-aee-advanced-toggle__link" onclick="jQuery(this).closest('.gf-aee-advanced-toggle').toggleClass('gf-aee-advanced-toggle--open'); return false;">
+                <?php esc_html_e('Advanced options', 'gf-advanced-expiring-entries'); ?>
+                <span class="gf-aee-advanced-toggle__icon">▸</span>
+            </a>
+            <div class="gf-aee-advanced-content">
+                <label class="gf-aee-advanced-content__label">
+                    <?php esc_html_e('Snap To', 'gf-advanced-expiring-entries'); ?>
+                </label>
+                <select name="_gform_setting_snap_to" class="gform-input__select">
+                    <?php foreach ($snap_choices as $val => $label) : ?>
+                        <option value="<?php echo esc_attr($val); ?>" <?php selected($snap_value, $val); ?>>
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
+    }
+
     /* ─── Dry-run notice ──────────────────────────────────────────────── */
 
     public function maybe_show_dry_run_notice()

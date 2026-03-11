@@ -125,3 +125,60 @@
 .gf-aee-feed-summary p {
 	margin: 0;
 }
+
+/* ── Offset inline: direction + value + unit on one row ───────────────── */
+.gf-aee-offset-inline {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.gf-aee-offset-inline input[type="number"] {
+	width: 80px;
+}
+
+.gf-aee-offset-inline select:first-child {
+	width: 55px;
+}
+
+/* ── Advanced source options toggle ───────────────────────────────────── */
+.gf-aee-advanced-toggle__link {
+	display: inline-block;
+	font-size: 13px;
+	color: #2271b1;
+	text-decoration: none;
+	cursor: pointer;
+	margin-top: 4px;
+}
+
+.gf-aee-advanced-toggle__link:hover {
+	color: #135e96;
+	text-decoration: underline;
+}
+
+.gf-aee-advanced-toggle__icon {
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+
+.gf-aee-advanced-toggle--open .gf-aee-advanced-toggle__icon {
+	transform: rotate(90deg);
+}
+
+.gf-aee-advanced-content {
+	display: none;
+	margin-top: 8px;
+	padding: 8px 0;
+}
+
+.gf-aee-advanced-toggle--open .gf-aee-advanced-content {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.gf-aee-advanced-content__label {
+	font-weight: 600;
+	font-size: 13px;
+	white-space: nowrap;
+}

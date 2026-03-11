@@ -121,6 +121,12 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.0 - 2026-03-11
+- **Improved:** Merged Pre-Expiry, Post-Expiry (Success), and Post-Expiry (Fail) notification panels into a single "Notifications" section — same features, less visual noise
+- **Improved:** Offset Direction, Value, and Unit fields now display on a single inline row instead of three separate rows
+- **Improved:** "Snap To" option is now tucked behind an "Advanced options" toggle to reduce default complexity
+- **Improved:** Renamed "Empty Date Fallback" section to "Missing Date Handling" for clarity
+
 ### 1.1.2 - 2026-03-10
 - **Fixed:** Pre-expiry notifications could be sent after the entry had already expired when the notification timestamp was in the past (e.g. retroactive processing or short remaining time)
 - **Fixed:** Setting a manual override date did not reschedule the pre-expiry notification for the new date

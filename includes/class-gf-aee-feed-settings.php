@@ -26,9 +26,7 @@ class GF_AEE_Feed_Settings
             self::section_feed_name(),
             self::section_expiry_source($form),
             self::section_expiry_action($form),
-            self::section_pre_notification($form),
-            self::section_post_notification_success($form),
-            self::section_post_notification_fail($form),
+            self::section_notifications($form),
             self::section_empty_date_fallback(),
             self::section_conditional_logic(),
         );
@@ -142,31 +140,13 @@ class GF_AEE_Feed_Settings
                         ),
                     ),
                 ),
-                // Offset direction.
+                // Offset – inline direction + value + unit.
                 array(
-                    'label'      => esc_html__('Offset Direction', 'gf-advanced-expiring-entries'),
-                    'type'       => 'select',
-                    'name'       => 'offset_direction',
-                    'choices'    => array(
-                        array('label' => '+', 'value' => '+'),
-                        array('label' => '-', 'value' => '-'),
-                    ),
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic', 'entry_meta')),
-                            array('field' => 'use_offset',  'values' => array('1')),
-                        ),
-                    ),
-                ),
-                // Offset value.
-                array(
-                    'label'      => esc_html__('Offset Value', 'gf-advanced-expiring-entries'),
-                    'type'       => 'text',
+                    'label'      => esc_html__('Offset', 'gf-advanced-expiring-entries'),
+                    'type'       => 'offset_inline',
                     'name'       => 'offset_value',
-                    'class'      => 'small',
-                    'input_type' => 'number',
-                    'required'   => true,
+                    'dir_name'   => 'offset_direction',
+                    'unit_name'  => 'offset_unit',
                     'dependency' => array(
                         'live'   => true,
                         'fields' => array(
@@ -175,37 +155,11 @@ class GF_AEE_Feed_Settings
                         ),
                     ),
                 ),
-                // Offset unit.
+                // Advanced source options (Snap To).
                 array(
-                    'label'      => esc_html__('Offset Unit', 'gf-advanced-expiring-entries'),
-                    'type'       => 'select',
-                    'name'       => 'offset_unit',
-                    'choices'    => array(
-                        array('label' => esc_html__('Minutes', 'gf-advanced-expiring-entries'), 'value' => 'minutes'),
-                        array('label' => esc_html__('Hours',   'gf-advanced-expiring-entries'), 'value' => 'hours'),
-                        array('label' => esc_html__('Days',    'gf-advanced-expiring-entries'), 'value' => 'days'),
-                        array('label' => esc_html__('Weeks',   'gf-advanced-expiring-entries'), 'value' => 'weeks'),
-                        array('label' => esc_html__('Months',  'gf-advanced-expiring-entries'), 'value' => 'months'),
-                    ),
-                    'default_value' => 'days',
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic', 'entry_meta')),
-                            array('field' => 'use_offset',  'values' => array('1')),
-                        ),
-                    ),
-                ),
-                // Snap-to.
-                array(
-                    'label'      => esc_html__('Snap To', 'gf-advanced-expiring-entries'),
-                    'type'       => 'select',
+                    'label'      => '',
+                    'type'       => 'advanced_source_options',
                     'name'       => 'snap_to',
-                    'choices'    => array(
-                        array('label' => esc_html__('No snap', 'gf-advanced-expiring-entries'),              'value' => ''),
-                        array('label' => esc_html__('Start of day (00:00)', 'gf-advanced-expiring-entries'), 'value' => 'start'),
-                        array('label' => esc_html__('End of day (23:59)', 'gf-advanced-expiring-entries'),   'value' => 'end'),
-                    ),
                     'dependency' => array(
                         'live'   => true,
                         'fields' => array(
@@ -333,18 +287,19 @@ class GF_AEE_Feed_Settings
         );
     }
 
-    /* ─── Section: Pre-Expiry Notification ─────────────────────────────── */
+    /* ─── Section: Notifications (unified) ────────────────────────────── */
 
-    private static function section_pre_notification($form)
+    private static function section_notifications($form)
     {
 
         $notifications = self::get_notification_choices($form);
 
         return array(
-            'title'  => esc_html__('Pre-Expiry Notification', 'gf-advanced-expiring-entries'),
+            'title'  => esc_html__('Notifications', 'gf-advanced-expiring-entries'),
             'fields' => array(
+                // ── Pre-expiry ──
                 array(
-                    'label'   => esc_html__('Enable Pre-Expiry Notification', 'gf-advanced-expiring-entries'),
+                    'label'   => esc_html__('Pre-Expiry', 'gf-advanced-expiring-entries'),
                     'type'    => 'checkbox',
                     'name'    => 'enable_pre_notification',
                     'choices' => array(
@@ -375,22 +330,9 @@ class GF_AEE_Feed_Settings
                         ),
                     ),
                 ),
-            ),
-        );
-    }
-
-    /* ─── Section: Post-Expiry Notification on Success ─────────────────── */
-
-    private static function section_post_notification_success($form)
-    {
-
-        $notifications = self::get_notification_choices($form);
-
-        return array(
-            'title'  => esc_html__('Post-Expiry Notification on Successful Expiry Action', 'gf-advanced-expiring-entries'),
-            'fields' => array(
+                // ── Post-expiry (success) ──
                 array(
-                    'label'   => esc_html__('Enable Post-Expiry Notification (Success)', 'gf-advanced-expiring-entries'),
+                    'label'   => esc_html__('On Successful Expiry', 'gf-advanced-expiring-entries'),
                     'type'    => 'checkbox',
                     'name'    => 'enable_post_notification_success',
                     'choices' => array(
@@ -421,22 +363,9 @@ class GF_AEE_Feed_Settings
                         ),
                     ),
                 ),
-            ),
-        );
-    }
-
-    /* ─── Section: Post-Expiry Notification on Fail ────────────────────── */
-
-    private static function section_post_notification_fail($form)
-    {
-
-        $notifications = self::get_notification_choices($form);
-
-        return array(
-            'title'  => esc_html__('Post-Expiry Notification on Failed Expiry Action', 'gf-advanced-expiring-entries'),
-            'fields' => array(
+                // ── Post-expiry (fail) ──
                 array(
-                    'label'   => esc_html__('Enable Post-Expiry Notification (Fail)', 'gf-advanced-expiring-entries'),
+                    'label'   => esc_html__('On Failed Expiry', 'gf-advanced-expiring-entries'),
                     'type'    => 'checkbox',
                     'name'    => 'enable_post_notification_fail',
                     'choices' => array(
@@ -471,12 +400,12 @@ class GF_AEE_Feed_Settings
         );
     }
 
-    /* ─── Section: Empty Date Fallback ─────────────────────────────────── */
+    /* ─── Section: Missing Date Handling ───────────────────────────────── */
 
     private static function section_empty_date_fallback()
     {
         return array(
-            'title'      => esc_html__('Empty Date Fallback', 'gf-advanced-expiring-entries'),
+            'title'      => esc_html__('Missing Date Handling', 'gf-advanced-expiring-entries'),
             'dependency' => array(
                 'live'   => true,
                 'fields' => array(
