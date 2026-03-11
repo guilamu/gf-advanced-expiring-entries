@@ -3,10 +3,10 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.2.0\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.2.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
-"PO-Revision-Date: 2026-03-11 06:45+0100\n"
+"PO-Revision-Date: 2026-03-11 10:21+0100\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.8\n"
 "X-Domain: gf-advanced-expiring-entries\n"
 
 #. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = field label
@@ -137,10 +137,6 @@ msgstr "Journal des actions (3 dernières)"
 msgid "Active"
 msgstr "Actif"
 
-#: includes/class-gf-aee-feed-settings.php
-msgid "Add a time offset"
-msgstr "Ajouter un décalage horaire"
-
 #: includes/class-gf-aee-addon.php
 msgid "Adjust the settings above to see a summary of this feed rule."
 msgstr "Ajustez les paramètres ci-dessus pour voir un résumé de cette règle de flux."
@@ -172,14 +168,6 @@ msgstr "l'une"
 #: includes/class-gf-aee-addon.php
 msgid "At a fixed date (not yet set),"
 msgstr "À une date fixe (non encore définie),"
-
-#: includes/class-gf-aee-feed-settings.php
-msgid "Based on a date field"
-msgstr "Basé sur un champ de date"
-
-#: includes/class-gf-aee-feed-settings.php
-msgid "Based on entry date"
-msgstr "Basé sur la date de l'entrée"
 
 #: includes/class-gf-aee-addon.php
 msgid "before"
@@ -276,6 +264,18 @@ msgstr "Date de l'entrée"
 #: includes/class-gf-aee-feed-settings.php
 msgid "Entry Date Source"
 msgstr "Source de la date de l'entrée"
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire all matching entries on a specific date."
+msgstr "Expire toutes les entrées correspondantes à une date précise."
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire entries based on a date field value in the form."
+msgstr "Expire les entrées en fonction d'un champ de date du formulaire."
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire entries based on their creation or last-updated date."
+msgstr "Expire les entrées en fonction de leur date de création ou de dernière mise à jour."
 
 #: admin/views/entry-meta-box.php
 msgid "Entry Expiration"
@@ -383,7 +383,7 @@ msgid "Fixed"
 msgstr "Fixe"
 
 #: includes/class-gf-aee-feed-settings.php
-msgid "Fixed date"
+msgid "Fixed Date"
 msgstr "Date fixe"
 
 #: includes/class-gf-aee-feed-settings.php
@@ -506,6 +506,10 @@ msgstr "Nouveau"
 #: includes/class-gf-aee-feed-settings.php
 msgid "New Field Value"
 msgstr "Nouvelle valeur du champ"
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "No date field present in the form."
+msgstr "Aucun champ de date présent dans le formulaire."
 
 #: includes/class-gf-aee-addon.php
 msgid "No expiry actions will be executed. Disable this in the plugin settings."

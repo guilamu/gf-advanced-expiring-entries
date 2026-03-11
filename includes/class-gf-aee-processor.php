@@ -64,12 +64,12 @@ class GF_AEE_Processor
             }
 
             // Apply offset.
-            if (rgar($meta, 'use_offset')) {
+            $offset_val = absint(rgar($meta, 'offset_value', 0));
+            if ($offset_val > 0) {
                 $direction = rgar($meta, 'offset_direction', '+');
-                $value     = absint(rgar($meta, 'offset_value', 0));
-                $unit      = rgar($meta, 'offset_unit', 'days');
+                $unit      = rgar($meta, 'offset_unit', 'minutes');
 
-                $base_ts = self::apply_offset($base_ts, $direction, $value, $unit);
+                $base_ts = self::apply_offset($base_ts, $direction, $offset_val, $unit);
             }
 
             // Snap-to.
@@ -99,12 +99,12 @@ class GF_AEE_Processor
             }
 
             // Apply offset.
-            if (rgar($meta, 'use_offset')) {
+            $offset_val = absint(rgar($meta, 'offset_value', 0));
+            if ($offset_val > 0) {
                 $direction = rgar($meta, 'offset_direction', '+');
-                $value     = absint(rgar($meta, 'offset_value', 0));
-                $unit      = rgar($meta, 'offset_unit', 'days');
+                $unit      = rgar($meta, 'offset_unit', 'minutes');
 
-                $base_ts = self::apply_offset($base_ts, $direction, $value, $unit);
+                $base_ts = self::apply_offset($base_ts, $direction, $offset_val, $unit);
             }
 
             // Snap-to.

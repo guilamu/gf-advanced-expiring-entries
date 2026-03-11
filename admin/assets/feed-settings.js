@@ -257,10 +257,67 @@
         initExpiryCheck();
         initFeedSummary();
         initLogAjaxFilter();
+        initButtonGroups();
 
         // Re-init datepickers after GF AJAX refreshes settings markup.
         $(document).on('gform_post_render', initDatepickers);
     });
+
+    /* ── Button group toggle ──────────────────────────────────────────── */
+    function initButtonGroups() {
+        // Prevent clicks on disabled buttons.
+        $(document).on('click', '.gf-aee-button-group__btn--disabled', function (e) {
+            e.preventDefault();
+            return false;
+        });
+
+        $(document).on('change', '.gf-aee-button-group input[type="radio"]', function () {
+            var $group = $(this).closest('.gf-aee-button-group');
+            $group.find('.gf-aee-button-group__btn').removeClass('gf-aee-button-group__btn--active');
+            $(this).closest('.gf-aee-button-group__btn').addClass('gf-aee-button-group__btn--active');
+            toggleExpiryFields();
+        });
+
+        // Set correct visibility on page load.
+        toggleExpiryFields();
+    }
+
+    /* ── Expiry type → field visibility ────────────────────────────────── */
+    function toggleExpiryFields() {
+        var type = $('[name="_gform_setting_expiry_type"]:checked').val();
+        if (!type) return;
+
+        var show = {
+            fixed_expiry_date: type === 'fixed',
+            date_field_id:     type === 'dynamic',
+            entry_meta_source: type === 'entry_meta',
+            offset_value:      type === 'dynamic' || type === 'entry_meta',
+            snap_to:           type === 'dynamic' || type === 'entry_meta'
+        };
+
+        $.each(show, function (fieldName, visible) {
+            getSettingRow(fieldName)[visible ? 'show' : 'hide']();
+        });
+    }
+
+    /**
+     * Locate the GF settings row that wraps a given field name.
+     */
+    function getSettingRow(name) {
+        var $row = $('#gaddon-setting-row-' + name);
+        if ($row.length) return $row;
+
+        var $input = $('[name="_gform_setting_' + name + '"]');
+        if (!$input.length) return $();
+
+        var $tr = $input.closest('tr');
+        if ($tr.length) return $tr;
+
+        var $container = $input.closest('.gaddon-setting-row, .gform-settings-field, [class*="gaddon-setting"]');
+        if ($container.length) return $container;
+
+        return $();
+    }
 
     /* ── Live log filtering (AJAX) ────────────────────────────────────── */
     var logFilterTimer = null;

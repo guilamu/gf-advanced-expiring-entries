@@ -61,21 +61,37 @@ class GF_AEE_Feed_Settings
     {
 
         // Collect date-type fields from the form.
-        $date_fields = self::get_date_field_choices($form);
+        $date_fields    = self::get_date_field_choices($form);
+        $has_date_fields = count($date_fields) > 1; // first choice is the placeholder
 
         return array(
             'title'  => esc_html__('Expiry Source', 'gf-advanced-expiring-entries'),
             'fields' => array(
                 array(
                     'label'   => esc_html__('Expiry Type', 'gf-advanced-expiring-entries'),
-                    'type'    => 'radio',
+                    'type'    => 'button_group',
                     'name'    => 'expiry_type',
                     'choices' => array(
-                        array('label' => esc_html__('Fixed date', 'gf-advanced-expiring-entries'), 'value' => 'fixed'),
-                        array('label' => esc_html__('Based on a date field', 'gf-advanced-expiring-entries'), 'value' => 'dynamic'),
-                        array('label' => esc_html__('Based on entry date', 'gf-advanced-expiring-entries'), 'value' => 'entry_meta'),
+                        array(
+                            'label'   => esc_html__('Entry Date', 'gf-advanced-expiring-entries'),
+                            'value'   => 'entry_meta',
+                            'tooltip' => esc_attr__('Expire entries based on their creation or last-updated date.', 'gf-advanced-expiring-entries'),
+                        ),
+                        array(
+                            'label'    => esc_html__('Date Field', 'gf-advanced-expiring-entries'),
+                            'value'    => 'dynamic',
+                            'tooltip'  => $has_date_fields
+                                ? esc_attr__('Expire entries based on a date field value in the form.', 'gf-advanced-expiring-entries')
+                                : esc_attr__('No date field present in the form.', 'gf-advanced-expiring-entries'),
+                            'disabled' => ! $has_date_fields,
+                        ),
+                        array(
+                            'label'   => esc_html__('Fixed Date', 'gf-advanced-expiring-entries'),
+                            'value'   => 'fixed',
+                            'tooltip' => esc_attr__('Expire all matching entries on a specific date.', 'gf-advanced-expiring-entries'),
+                        ),
                     ),
-                    'default_value' => 'fixed',
+                    'default_value' => 'entry_meta',
                 ),
                 // Fixed date.
                 array(
@@ -83,13 +99,6 @@ class GF_AEE_Feed_Settings
                     'type'       => 'text',
                     'name'       => 'fixed_expiry_date',
                     'class'      => 'medium gf-aee-datepicker',
-                    'required'   => true,
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('fixed')),
-                        ),
-                    ),
                     'tooltip'    => esc_html__('Select a fixed date/time at which entries expire.', 'gf-advanced-expiring-entries'),
                 ),
                 // Dynamic – date field selector.
@@ -98,12 +107,6 @@ class GF_AEE_Feed_Settings
                     'type'       => 'select',
                     'name'       => 'date_field_id',
                     'choices'    => $date_fields,
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic')),
-                        ),
-                    ),
                 ),
                 // Entry meta – source selector.
                 array(
@@ -115,57 +118,21 @@ class GF_AEE_Feed_Settings
                         array('label' => esc_html__('Entry last updated', 'gf-advanced-expiring-entries'),  'value' => 'date_updated'),
                     ),
                     'default_value' => 'date_created',
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('entry_meta')),
-                        ),
-                    ),
                 ),
-                // Dynamic – use offset.
-                array(
-                    'label'      => esc_html__('Add a time offset', 'gf-advanced-expiring-entries'),
-                    'type'       => 'checkbox',
-                    'name'       => 'use_offset',
-                    'choices'    => array(
-                        array(
-                            'label' => esc_html__('Enable', 'gf-advanced-expiring-entries'),
-                            'name'  => 'use_offset',
-                        ),
-                    ),
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic', 'entry_meta')),
-                        ),
-                    ),
-                ),
-                // Offset – inline direction + value + unit.
+                // Offset – inline direction + value + unit (enabled by default).
                 array(
                     'label'      => esc_html__('Offset', 'gf-advanced-expiring-entries'),
                     'type'       => 'offset_inline',
                     'name'       => 'offset_value',
                     'dir_name'   => 'offset_direction',
                     'unit_name'  => 'offset_unit',
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic', 'entry_meta')),
-                            array('field' => 'use_offset',  'values' => array('1')),
-                        ),
-                    ),
+                    'default_value' => '0',
                 ),
                 // Advanced source options (Snap To).
                 array(
                     'label'      => '',
                     'type'       => 'advanced_source_options',
                     'name'       => 'snap_to',
-                    'dependency' => array(
-                        'live'   => true,
-                        'fields' => array(
-                            array('field' => 'expiry_type', 'values' => array('dynamic', 'entry_meta')),
-                        ),
-                    ),
                 ),
             ),
         );

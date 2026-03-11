@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.2.0\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.2.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -138,10 +138,6 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#: includes/class-gf-aee-feed-settings.php
-msgid "Add a time offset"
-msgstr ""
-
 #: includes/class-gf-aee-addon.php
 msgid "Adjust the settings above to see a summary of this feed rule."
 msgstr ""
@@ -172,14 +168,6 @@ msgstr ""
 
 #: includes/class-gf-aee-addon.php
 msgid "At a fixed date (not yet set),"
-msgstr ""
-
-#: includes/class-gf-aee-feed-settings.php
-msgid "Based on a date field"
-msgstr ""
-
-#: includes/class-gf-aee-feed-settings.php
-msgid "Based on entry date"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
@@ -278,6 +266,18 @@ msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
 msgid "Entry Date Source"
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire all matching entries on a specific date."
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire entries based on a date field value in the form."
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire entries based on their creation or last-updated date."
 msgstr ""
 
 #: admin/views/entry-meta-box.php
@@ -391,7 +391,7 @@ msgid "Fixed"
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
-msgid "Fixed date"
+msgid "Fixed Date"
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
@@ -518,6 +518,10 @@ msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
 msgid "New Field Value"
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "No date field present in the form."
 msgstr ""
 
 #: includes/class-gf-aee-addon.php

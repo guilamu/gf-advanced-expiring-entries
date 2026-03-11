@@ -121,6 +121,13 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.1 - 2026-03-11
+- **Improved:** Expiry Type selector is now a button group (Entry Date / Date Field / Fixed Date) instead of radio buttons
+- **Improved:** Entry Date is now the default expiry type
+- **Improved:** Time offset is always visible for Date Field and Entry Date types (defaults to 0 minutes) — removed the "Add a time offset" checkbox
+- **Improved:** Date Field button is automatically disabled (greyed out) when the form has no date fields
+- **Improved:** Each expiry type button now shows a tooltip on hover explaining its purpose
+
 ### 1.2.0 - 2026-03-11
 - **Improved:** Merged Pre-Expiry, Post-Expiry (Success), and Post-Expiry (Fail) notification panels into a single "Notifications" section — same features, less visual noise
 - **Improved:** Offset Direction, Value, and Unit fields now display on a single inline row instead of three separate rows

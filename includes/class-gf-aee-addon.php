@@ -537,9 +537,9 @@ class GF_AEE_Addon extends GFFeedAddOn
         $dir_name   = rgar($field, 'dir_name', 'offset_direction');
         $unit_name  = rgar($field, 'unit_name', 'offset_unit');
 
-        $current_value = $this->get_setting($value_name, '');
+        $current_value = $this->get_setting($value_name, '0');
         $current_dir   = $this->get_setting($dir_name, '+');
-        $current_unit  = $this->get_setting($unit_name, 'days');
+        $current_unit  = $this->get_setting($unit_name, 'minutes');
 
         $units = array(
             'minutes' => esc_html__('Minutes', 'gf-advanced-expiring-entries'),
@@ -570,6 +570,46 @@ class GF_AEE_Addon extends GFFeedAddOn
                     </option>
                 <?php endforeach; ?>
             </select>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
+    }
+
+    /**
+     * Render a button-group field (toggle buttons for selecting a value).
+     */
+    public function settings_button_group($field, $echo = true)
+    {
+        $name    = rgar($field, 'name');
+        $choices = rgar($field, 'choices', array());
+        $current = $this->get_setting($name, rgar($field, 'default_value', ''));
+
+        ob_start();
+        ?>
+        <div class="gf-aee-button-group">
+            <?php foreach ($choices as $choice) :
+                $value    = esc_attr($choice['value']);
+                $label    = esc_html($choice['label']);
+                $tooltip  = ! empty($choice['tooltip']) ? $choice['tooltip'] : '';
+                $disabled = ! empty($choice['disabled']);
+                $active   = ($current === $choice['value']) ? ' gf-aee-button-group__btn--active' : '';
+                $dis_cls  = $disabled ? ' gf-aee-button-group__btn--disabled' : '';
+            ?>
+                <label class="gf-aee-button-group__btn<?php echo $active . $dis_cls; ?>"
+                       <?php if ($tooltip) : ?>title="<?php echo esc_attr($tooltip); ?>"<?php endif; ?>>
+                    <input type="radio"
+                           name="_gform_setting_<?php echo esc_attr($name); ?>"
+                           value="<?php echo $value; ?>"
+                           <?php checked($current, $choice['value']); ?>
+                           <?php if ($disabled) : ?>disabled="disabled"<?php endif; ?>
+                           style="display:none;" />
+                    <?php echo $label; ?>
+                </label>
+            <?php endforeach; ?>
         </div>
         <?php
         $html = ob_get_clean();
@@ -828,10 +868,9 @@ class GF_AEE_Addon extends GFFeedAddOn
         $parts = array();
 
         // ── 1. Timing ──────────────────────────────────────────────────
-        $expiry_type = sanitize_key(rgar($meta, 'expiry_type', 'fixed'));
-        $use_offset  = ! empty($meta['use_offset']);
+        $expiry_type = sanitize_key(rgar($meta, 'expiry_type', 'entry_meta'));
         $offset_val  = absint(rgar($meta, 'offset_value', 0));
-        $offset_unit = sanitize_key(rgar($meta, 'offset_unit', 'days'));
+        $offset_unit = sanitize_key(rgar($meta, 'offset_unit', 'minutes'));
         $offset_dir  = rgar($meta, 'offset_direction', '+');
 
         $unit_labels = array(
@@ -859,8 +898,8 @@ class GF_AEE_Addon extends GFFeedAddOn
                 ? __('entry last updated date', 'gf-advanced-expiring-entries')
                 : __('entry creation date', 'gf-advanced-expiring-entries');
 
-            if ($use_offset && $offset_val > 0) {
-                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['days'];
+            if ($offset_val > 0) {
+                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['minutes'];
                 $unit_str   = sprintf(translate_nooped_plural($unit_noop, $offset_val, 'gf-advanced-expiring-entries'), $offset_val);
                 $dir_label  = $offset_dir === '-'
                     ? __('before', 'gf-advanced-expiring-entries')
@@ -883,8 +922,8 @@ class GF_AEE_Addon extends GFFeedAddOn
             $field_id    = rgar($meta, 'date_field_id', '');
             $field_label = $field_id && $form ? self::get_field_label($form, $field_id) : __('date field', 'gf-advanced-expiring-entries');
 
-            if ($use_offset && $offset_val > 0) {
-                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['days'];
+            if ($offset_val > 0) {
+                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['minutes'];
                 $unit_str   = sprintf(translate_nooped_plural($unit_noop, $offset_val, 'gf-advanced-expiring-entries'), $offset_val);
                 $dir_label  = $offset_dir === '-'
                     ? __('before', 'gf-advanced-expiring-entries')
