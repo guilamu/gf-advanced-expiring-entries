@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.2.1\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -21,9 +21,19 @@ msgstr ""
 msgid "%1$s %2$s the \"%3$s\" field value,"
 msgstr ""
 
+#. translators: 1: offset string, 2: "before"/"after", 3: time, 4: field label
+#: includes/class-gf-aee-addon.php
+msgid "%1$s %2$s %3$s on the \"%4$s\" field value,"
+msgstr ""
+
 #. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = date source label
 #: includes/class-gf-aee-addon.php
 msgid "%1$s %2$s the %3$s,"
+msgstr ""
+
+#. translators: 1: offset string, 2: "before"/"after", 3: time (e.g. "10:00"), 4: source label
+#: includes/class-gf-aee-addon.php
+msgid "%1$s %2$s %3$s on the %4$s,"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
@@ -143,10 +153,6 @@ msgid "Adjust the settings above to see a summary of this feed rule."
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
-msgid "Advanced options"
-msgstr ""
-
-#: includes/class-gf-aee-addon.php
 msgid "after"
 msgstr ""
 
@@ -168,6 +174,16 @@ msgstr ""
 
 #: includes/class-gf-aee-addon.php
 msgid "At a fixed date (not yet set),"
+msgstr ""
+
+#. translators: 1: time (e.g. "10:00"), 2: source label
+#: includes/class-gf-aee-addon.php
+msgid "At %1$s on the %2$s,"
+msgstr ""
+
+#. translators: 1: time, 2: field label
+#: includes/class-gf-aee-addon.php
+msgid "At %1$s on the \"%2$s\" date,"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
@@ -236,10 +252,6 @@ msgstr ""
 msgid "Enable dry-run mode"
 msgstr ""
 
-#: includes/class-gf-aee-feed-settings.php
-msgid "End of day (23:59)"
-msgstr ""
-
 #: includes/class-gf-aee-addon.php
 msgid "ends with"
 msgstr ""
@@ -270,6 +282,10 @@ msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
 msgid "Expire all matching entries on a specific date."
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire At"
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
@@ -537,8 +553,7 @@ msgid "No log entries found."
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
-#: includes/class-gf-aee-addon.php
-msgid "No snap"
+msgid "No specific time"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
@@ -682,22 +697,12 @@ msgstr ""
 msgid "Skipped: entry status is \"%s\" (already handled outside this plugin)."
 msgstr ""
 
-#: includes/class-gf-aee-feed-settings.php
-#: includes/class-gf-aee-addon.php
-msgid "Snap To"
-msgstr ""
-
 #: includes/class-gf-aee-addon.php
 msgid "starred"
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
 msgid "Starred"
-msgstr ""
-
-#: includes/class-gf-aee-feed-settings.php
-#: includes/class-gf-aee-addon.php
-msgid "Start of day (00:00)"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php

@@ -3,10 +3,10 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.2.1\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.2.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
-"PO-Revision-Date: 2026-03-11 10:21+0100\n"
+"PO-Revision-Date: 2026-03-11 11:47+0100\n"
 "Last-Translator: \n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -22,10 +22,20 @@ msgstr ""
 msgid "%1$s %2$s the \"%3$s\" field value,"
 msgstr "%1$s %2$s la valeur du champ « %3$s »,"
 
+#. translators: 1: offset string, 2: "before"/"after", 3: time, 4: field label
+#: includes/class-gf-aee-addon.php
+msgid "%1$s %2$s %3$s on the \"%4$s\" field value,"
+msgstr "%1$s %2$s %3$s sur la valeur du champ \\u00ab %4$s \\u00bb,"
+
 #. translators: %1$s = offset value, %2$s = direction (before/after), %3$s = date source label
 #: includes/class-gf-aee-addon.php
 msgid "%1$s %2$s the %3$s,"
 msgstr "%1$s %2$s la %3$s,"
+
+#. translators: 1: offset string, 2: "before"/"after", 3: time (e.g. "10:00"), 4: source label
+#: includes/class-gf-aee-addon.php
+msgid "%1$s %2$s %3$s on the %4$s,"
+msgstr "%1$s %2$s %3$s sur la %4$s,"
 
 #: includes/class-gf-aee-addon.php
 msgid "%d minute"
@@ -142,10 +152,6 @@ msgid "Adjust the settings above to see a summary of this feed rule."
 msgstr "Ajustez les paramètres ci-dessus pour voir un résumé de cette règle de flux."
 
 #: includes/class-gf-aee-addon.php
-msgid "Advanced options"
-msgstr "Options avancées"
-
-#: includes/class-gf-aee-addon.php
 msgid "after"
 msgstr "après"
 
@@ -168,6 +174,16 @@ msgstr "l'une"
 #: includes/class-gf-aee-addon.php
 msgid "At a fixed date (not yet set),"
 msgstr "À une date fixe (non encore définie),"
+
+#. translators: 1: time (e.g. "10:00"), 2: source label
+#: includes/class-gf-aee-addon.php
+msgid "At %1$s on the %2$s,"
+msgstr "À %1$s sur la %2$s,"
+
+#. translators: 1: time, 2: field label
+#: includes/class-gf-aee-addon.php
+msgid "At %1$s on the \"%2$s\" date,"
+msgstr "À %1$s sur la date « %2$s »,"
 
 #: includes/class-gf-aee-addon.php
 msgid "before"
@@ -233,10 +249,6 @@ msgstr "Activer"
 msgid "Enable dry-run mode"
 msgstr "Activer le mode simulation"
 
-#: includes/class-gf-aee-feed-settings.php
-msgid "End of day (23:59)"
-msgstr "Fin de journée (23:59)"
-
 #: includes/class-gf-aee-addon.php
 msgid "ends with"
 msgstr "se termine par"
@@ -268,6 +280,10 @@ msgstr "Source de la date de l'entrée"
 #: includes/class-gf-aee-feed-settings.php
 msgid "Expire all matching entries on a specific date."
 msgstr "Expire toutes les entrées correspondantes à une date précise."
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Expire At"
+msgstr "Expirer à"
 
 #: includes/class-gf-aee-feed-settings.php
 msgid "Expire entries based on a date field value in the form."
@@ -523,9 +539,9 @@ msgstr "Aucun formulaire avec des flux d'expiration configurés."
 msgid "No log entries found."
 msgstr "Aucune entrée de journal trouvée."
 
-#: includes/class-gf-aee-feed-settings.php includes/class-gf-aee-addon.php
-msgid "No snap"
-msgstr "Pas d'arrondi"
+#: includes/class-gf-aee-feed-settings.php
+msgid "No specific time"
+msgstr "Pas d'heure précise"
 
 #: includes/class-gf-aee-addon.php includes/class-gf-aee-feed-settings.php
 msgid "Notification"
@@ -667,10 +683,6 @@ msgstr "Ignoré"
 msgid "Skipped: entry status is \"%s\" (already handled outside this plugin)."
 msgstr "Ignoré : le statut de l'entrée est « %s » (déjà traité en dehors de cette extension)."
 
-#: includes/class-gf-aee-feed-settings.php includes/class-gf-aee-addon.php
-msgid "Snap To"
-msgstr "Arrondir à"
-
 #: includes/class-gf-aee-addon.php
 msgid "starred"
 msgstr "suivie"
@@ -678,10 +690,6 @@ msgstr "suivie"
 #: includes/class-gf-aee-feed-settings.php
 msgid "Starred"
 msgstr "Suivi"
-
-#: includes/class-gf-aee-feed-settings.php includes/class-gf-aee-addon.php
-msgid "Start of day (00:00)"
-msgstr "Début de journée (00:00)"
 
 #: includes/class-gf-aee-addon.php
 msgid "starts with"

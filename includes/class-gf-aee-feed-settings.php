@@ -103,10 +103,11 @@ class GF_AEE_Feed_Settings
                 ),
                 // Dynamic – date field selector.
                 array(
-                    'label'      => esc_html__('Date Field', 'gf-advanced-expiring-entries'),
-                    'type'       => 'select',
-                    'name'       => 'date_field_id',
-                    'choices'    => $date_fields,
+                    'label'         => esc_html__('Date Field', 'gf-advanced-expiring-entries'),
+                    'type'          => 'select',
+                    'name'          => 'date_field_id',
+                    'choices'       => $date_fields,
+                    'default_value' => count($date_fields) === 2 ? $date_fields[1]['value'] : '',
                 ),
                 // Entry meta – source selector.
                 array(
@@ -119,6 +120,14 @@ class GF_AEE_Feed_Settings
                     ),
                     'default_value' => 'date_created',
                 ),
+                // Expire At — specific time of day.
+                array(
+                    'label'         => esc_html__('Expire At', 'gf-advanced-expiring-entries'),
+                    'type'          => 'select',
+                    'name'          => 'expiry_time',
+                    'choices'       => self::get_time_choices(),
+                    'default_value' => '',
+                ),
                 // Offset – inline direction + value + unit (enabled by default).
                 array(
                     'label'      => esc_html__('Offset', 'gf-advanced-expiring-entries'),
@@ -127,12 +136,6 @@ class GF_AEE_Feed_Settings
                     'dir_name'   => 'offset_direction',
                     'unit_name'  => 'offset_unit',
                     'default_value' => '0',
-                ),
-                // Advanced source options (Snap To).
-                array(
-                    'label'      => '',
-                    'type'       => 'advanced_source_options',
-                    'name'       => 'snap_to',
                 ),
             ),
         );
@@ -427,6 +430,22 @@ class GF_AEE_Feed_Settings
     }
 
 	/* ─── Helpers ──────────────────────────────────────────────────────── */
+
+    /**
+     * Build hourly time-of-day choices for the "Expire At" select.
+     */
+    private static function get_time_choices()
+    {
+        $choices = array(
+            array('label' => '— ' . esc_html__('No specific time', 'gf-advanced-expiring-entries') . ' —', 'value' => ''),
+        );
+        for ($h = 0; $h < 24; $h++) {
+            $time      = sprintf('%02d:00', $h);
+            $choices[] = array('label' => $time, 'value' => $time);
+        }
+        $choices[] = array('label' => '23:59', 'value' => '23:59');
+        return $choices;
+    }
 
     /**
      * Build choices array from all date-type fields in a form.

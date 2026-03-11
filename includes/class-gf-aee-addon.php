@@ -282,7 +282,9 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         // Override date.
         if (! empty($_POST['gf_aee_override_date'])) {
-            $override_ts = strtotime(sanitize_text_field(wp_unslash($_POST['gf_aee_override_date'])));
+            $override_raw = sanitize_text_field(wp_unslash($_POST['gf_aee_override_date']));
+            $override_dt  = date_create($override_raw, wp_timezone());
+            $override_ts  = $override_dt ? $override_dt->getTimestamp() : false;
             if ($override_ts) {
                 GF_AEE_Meta::set_override($entry_id, $override_ts);
 
@@ -619,47 +621,6 @@ class GF_AEE_Addon extends GFFeedAddOn
         return $html;
     }
 
-    /**
-     * Render the advanced source options toggle (wraps Snap To).
-     */
-    public function settings_advanced_source_options($field, $echo = true)
-    {
-        $snap_value = $this->get_setting('snap_to', '');
-
-        $snap_choices = array(
-            ''      => esc_html__('No snap', 'gf-advanced-expiring-entries'),
-            'start' => esc_html__('Start of day (00:00)', 'gf-advanced-expiring-entries'),
-            'end'   => esc_html__('End of day (23:59)', 'gf-advanced-expiring-entries'),
-        );
-
-        ob_start();
-        ?>
-        <div class="gf-aee-advanced-toggle">
-            <a href="#" class="gf-aee-advanced-toggle__link" onclick="jQuery(this).closest('.gf-aee-advanced-toggle').toggleClass('gf-aee-advanced-toggle--open'); return false;">
-                <?php esc_html_e('Advanced options', 'gf-advanced-expiring-entries'); ?>
-                <span class="gf-aee-advanced-toggle__icon">▸</span>
-            </a>
-            <div class="gf-aee-advanced-content">
-                <label class="gf-aee-advanced-content__label">
-                    <?php esc_html_e('Snap To', 'gf-advanced-expiring-entries'); ?>
-                </label>
-                <select name="_gform_setting_snap_to" class="gform-input__select">
-                    <?php foreach ($snap_choices as $val => $label) : ?>
-                        <option value="<?php echo esc_attr($val); ?>" <?php selected($snap_value, $val); ?>>
-                            <?php echo esc_html($label); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
-        <?php
-        $html = ob_get_clean();
-        if ($echo) {
-            echo $html;
-        }
-        return $html;
-    }
-
     /* ─── Dry-run notice ──────────────────────────────────────────────── */
 
     public function maybe_show_dry_run_notice()
@@ -881,6 +842,28 @@ class GF_AEE_Addon extends GFFeedAddOn
             'months'  => _n_noop('%d month', '%d months', 'gf-advanced-expiring-entries'),
         );
 
+        // Pre-compute offset label.
+        $unit_str  = '';
+        $dir_label = '';
+        if ($offset_val > 0) {
+            $unit_noop = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['minutes'];
+            $unit_str  = sprintf(translate_nooped_plural($unit_noop, $offset_val, 'gf-advanced-expiring-entries'), $offset_val);
+            $dir_label = $offset_dir === '-'
+                ? __('before', 'gf-advanced-expiring-entries')
+                : __('after', 'gf-advanced-expiring-entries');
+        }
+
+        // Resolve "Expire At" time (new `expiry_time` or legacy `snap_to`).
+        $expiry_time = sanitize_text_field(rgar($meta, 'expiry_time', ''));
+        if (empty($expiry_time)) {
+            $snap = rgar($meta, 'snap_to', '');
+            if ($snap === 'start') {
+                $expiry_time = '00:00';
+            } elseif ($snap === 'end') {
+                $expiry_time = '23:59';
+            }
+        }
+
         if ($expiry_type === 'fixed') {
             $fixed_date = sanitize_text_field(rgar($meta, 'fixed_expiry_date', ''));
             if ($fixed_date) {
@@ -898,12 +881,23 @@ class GF_AEE_Addon extends GFFeedAddOn
                 ? __('entry last updated date', 'gf-advanced-expiring-entries')
                 : __('entry creation date', 'gf-advanced-expiring-entries');
 
-            if ($offset_val > 0) {
-                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['minutes'];
-                $unit_str   = sprintf(translate_nooped_plural($unit_noop, $offset_val, 'gf-advanced-expiring-entries'), $offset_val);
-                $dir_label  = $offset_dir === '-'
-                    ? __('before', 'gf-advanced-expiring-entries')
-                    : __('after', 'gf-advanced-expiring-entries');
+            if ($offset_val > 0 && $expiry_time) {
+                $parts[] = sprintf(
+                    /* translators: 1: offset string, 2: "before"/"after", 3: time (e.g. "10:00"), 4: source label */
+                    __('%1$s %2$s %3$s on the %4$s,', 'gf-advanced-expiring-entries'),
+                    ucfirst($unit_str),
+                    $dir_label,
+                    $expiry_time,
+                    $source_label
+                );
+            } elseif ($expiry_time) {
+                $parts[] = sprintf(
+                    /* translators: 1: time (e.g. "10:00"), 2: source label */
+                    __('At %1$s on the %2$s,', 'gf-advanced-expiring-entries'),
+                    $expiry_time,
+                    $source_label
+                );
+            } elseif ($offset_val > 0) {
                 $parts[] = sprintf(
                     /* translators: 1: offset string (e.g. "1 minute"), 2: "before"/"after", 3: source label */
                     __('%1$s %2$s the %3$s,', 'gf-advanced-expiring-entries'),
@@ -922,12 +916,23 @@ class GF_AEE_Addon extends GFFeedAddOn
             $field_id    = rgar($meta, 'date_field_id', '');
             $field_label = $field_id && $form ? self::get_field_label($form, $field_id) : __('date field', 'gf-advanced-expiring-entries');
 
-            if ($offset_val > 0) {
-                $unit_noop  = isset($unit_labels[$offset_unit]) ? $unit_labels[$offset_unit] : $unit_labels['minutes'];
-                $unit_str   = sprintf(translate_nooped_plural($unit_noop, $offset_val, 'gf-advanced-expiring-entries'), $offset_val);
-                $dir_label  = $offset_dir === '-'
-                    ? __('before', 'gf-advanced-expiring-entries')
-                    : __('after', 'gf-advanced-expiring-entries');
+            if ($offset_val > 0 && $expiry_time) {
+                $parts[] = sprintf(
+                    /* translators: 1: offset string, 2: "before"/"after", 3: time, 4: field label */
+                    __('%1$s %2$s %3$s on the "%4$s" field value,', 'gf-advanced-expiring-entries'),
+                    ucfirst($unit_str),
+                    $dir_label,
+                    $expiry_time,
+                    $field_label
+                );
+            } elseif ($expiry_time) {
+                $parts[] = sprintf(
+                    /* translators: 1: time, 2: field label */
+                    __('At %1$s on the "%2$s" date,', 'gf-advanced-expiring-entries'),
+                    $expiry_time,
+                    $field_label
+                );
+            } elseif ($offset_val > 0) {
                 $parts[] = sprintf(
                     /* translators: 1: offset string, 2: "before"/"after", 3: field label */
                     __('%1$s %2$s the "%3$s" field value,', 'gf-advanced-expiring-entries'),

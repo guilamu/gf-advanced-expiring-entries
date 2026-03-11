@@ -292,7 +292,7 @@
             date_field_id:     type === 'dynamic',
             entry_meta_source: type === 'entry_meta',
             offset_value:      type === 'dynamic' || type === 'entry_meta',
-            snap_to:           type === 'dynamic' || type === 'entry_meta'
+            expiry_time:       true
         };
 
         $.each(show, function (fieldName, visible) {

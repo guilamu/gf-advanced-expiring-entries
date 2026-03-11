@@ -26,13 +26,18 @@ class GF_AEE_Processor
         if (rgar($meta, 'expiry_type') === 'fixed') {
 
             $fixed_date = rgar($meta, 'fixed_expiry_date');
-            $expiry_ts  = $fixed_date ? strtotime($fixed_date) : null;
+            if ($fixed_date) {
+                // User-facing date → interpret in the WP timezone.
+                $dt        = date_create($fixed_date, wp_timezone());
+                $expiry_ts = $dt ? $dt->getTimestamp() : null;
+            }
 
             /* ── Dynamic (based on a date field) ──────────────────────────── */
         } elseif (rgar($meta, 'expiry_type') === 'dynamic') {
 
             $field_id   = rgar($meta, 'date_field_id');
             $date_value = rgar($entry, $field_id);
+            $is_utc     = false;
 
             // Fallback when the source date field is empty.
             if (empty($date_value)) {
@@ -45,6 +50,7 @@ class GF_AEE_Processor
 
                     case 'entry_date':
                         $date_value = rgar($entry, 'date_created');
+                        $is_utc     = true; // GF stores date_created in UTC.
                         break;
 
                     case 'fixed_fallback':
@@ -57,30 +63,20 @@ class GF_AEE_Processor
                 }
             }
 
-            $base_ts = strtotime($date_value);
+            // User-facing dates are interpreted in the WP timezone;
+            // GF-internal dates (date_created fallback) are already UTC.
+            if ($is_utc) {
+                $base_ts = strtotime($date_value);
+            } else {
+                $dt      = date_create($date_value, wp_timezone());
+                $base_ts = $dt ? $dt->getTimestamp() : false;
+            }
 
             if (! $base_ts) {
                 return; // un-parseable date.
             }
 
-            // Apply offset.
-            $offset_val = absint(rgar($meta, 'offset_value', 0));
-            if ($offset_val > 0) {
-                $direction = rgar($meta, 'offset_direction', '+');
-                $unit      = rgar($meta, 'offset_unit', 'minutes');
-
-                $base_ts = self::apply_offset($base_ts, $direction, $offset_val, $unit);
-            }
-
-            // Snap-to.
-            $snap = rgar($meta, 'snap_to', '');
-            if ($snap === 'start') {
-                $base_ts = mktime(0, 0, 0, (int) gmdate('n', $base_ts), (int) gmdate('j', $base_ts), (int) gmdate('Y', $base_ts));
-            } elseif ($snap === 'end') {
-                $base_ts = mktime(23, 59, 59, (int) gmdate('n', $base_ts), (int) gmdate('j', $base_ts), (int) gmdate('Y', $base_ts));
-            }
-
-            $expiry_ts = $base_ts;
+            $expiry_ts = self::apply_time_and_offset($base_ts, $meta);
 
             /* ── Entry date (creation or last updated) ────────────────────── */
         } elseif (rgar($meta, 'expiry_type') === 'entry_meta') {
@@ -92,30 +88,14 @@ class GF_AEE_Processor
                 return; // should not happen, but guard.
             }
 
+            // date_created / date_updated are stored in UTC by GF.
             $base_ts = strtotime($date_value);
 
             if (! $base_ts) {
                 return;
             }
 
-            // Apply offset.
-            $offset_val = absint(rgar($meta, 'offset_value', 0));
-            if ($offset_val > 0) {
-                $direction = rgar($meta, 'offset_direction', '+');
-                $unit      = rgar($meta, 'offset_unit', 'minutes');
-
-                $base_ts = self::apply_offset($base_ts, $direction, $offset_val, $unit);
-            }
-
-            // Snap-to.
-            $snap = rgar($meta, 'snap_to', '');
-            if ($snap === 'start') {
-                $base_ts = mktime(0, 0, 0, (int) gmdate('n', $base_ts), (int) gmdate('j', $base_ts), (int) gmdate('Y', $base_ts));
-            } elseif ($snap === 'end') {
-                $base_ts = mktime(23, 59, 59, (int) gmdate('n', $base_ts), (int) gmdate('j', $base_ts), (int) gmdate('Y', $base_ts));
-            }
-
-            $expiry_ts = $base_ts;
+            $expiry_ts = self::apply_time_and_offset($base_ts, $meta);
         }
 
         if (! $expiry_ts || $expiry_ts <= 0) {
@@ -153,6 +133,49 @@ class GF_AEE_Processor
                 }
             }
         }
+    }
+
+    /**
+     * Apply time-of-day override and time offset to a base timestamp.
+     *
+     * Time override is applied first (in the WP timezone) so the offset
+     * adjusts from the anchored time. Supports legacy `snap_to` values.
+     *
+     * @param int   $base_ts Base Unix timestamp.
+     * @param array $meta    Feed meta.
+     *
+     * @return int Modified timestamp.
+     */
+    private static function apply_time_and_offset($base_ts, $meta)
+    {
+        // Resolve time override: new `expiry_time` or legacy `snap_to`.
+        $expiry_time = rgar($meta, 'expiry_time', '');
+        if (empty($expiry_time)) {
+            $snap = rgar($meta, 'snap_to', '');
+            if ($snap === 'start') {
+                $expiry_time = '00:00';
+            } elseif ($snap === 'end') {
+                $expiry_time = '23:59';
+            }
+        }
+
+        // 1. Set time of day (in WP timezone).
+        if ($expiry_time && preg_match('/^(\d{1,2}):(\d{2})$/', $expiry_time, $m)) {
+            $tz = wp_timezone();
+            $dt = (new \DateTimeImmutable('@' . $base_ts))->setTimezone($tz);
+            $dt = $dt->setTime((int) $m[1], (int) $m[2], 0);
+            $base_ts = $dt->getTimestamp();
+        }
+
+        // 2. Apply offset.
+        $offset_val = absint(rgar($meta, 'offset_value', 0));
+        if ($offset_val > 0) {
+            $direction = rgar($meta, 'offset_direction', '+');
+            $unit      = rgar($meta, 'offset_unit', 'minutes');
+            $base_ts   = self::apply_offset($base_ts, $direction, $offset_val, $unit);
+        }
+
+        return $base_ts;
     }
 
     /**

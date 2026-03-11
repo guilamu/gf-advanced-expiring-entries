@@ -121,12 +121,20 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.2 - 2026-03-11
+- **Improved:** When the form has a single date field, it is automatically preselected in the Date Field dropdown
+- **Improved:** "Expire At" time picker is now visible for all three expiry types (including Fixed Date)
+- **Improved:** Offset direction, value, and unit fields are now equal width for a cleaner layout
+
 ### 1.2.1 - 2026-03-11
 - **Improved:** Expiry Type selector is now a button group (Entry Date / Date Field / Fixed Date) instead of radio buttons
 - **Improved:** Entry Date is now the default expiry type
 - **Improved:** Time offset is always visible for Date Field and Entry Date types (defaults to 0 minutes) — removed the "Add a time offset" checkbox
 - **Improved:** Date Field button is automatically disabled (greyed out) when the form has no date fields
 - **Improved:** Each expiry type button now shows a tooltip on hover explaining its purpose
+- **Improved:** Replaced "Snap To" (Advanced options) with a clearer "Expire At" time-of-day picker — choose an exact hourly time instead of vague "start/end of day" snapping
+- **Fixed:** Timezone mismatch — date field values and fixed dates were parsed as UTC instead of the WordPress timezone, causing wrong expiry times
+- **Fixed:** Snap-to (now "Expire At") was applied after the offset instead of before, cancelling the offset when snapping to day boundaries
 
 ### 1.2.0 - 2026-03-11
 - **Improved:** Merged Pre-Expiry, Post-Expiry (Success), and Post-Expiry (Fail) notification panels into a single "Notifications" section — same features, less visual noise
