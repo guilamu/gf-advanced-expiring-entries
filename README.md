@@ -121,6 +121,12 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.3 - 2026-03-11
+- **New:** Custom "Expiring Entries" notification event — create dedicated GF notifications that won't fire on form submission, designed for pre-expiry, post-expiry, or expiry action use
+- **Improved:** Retroactive tool form dropdown now only shows forms that have at least one active Expiring Entries feed
+- **Improved:** Retroactive tool now includes a processing mode selector: process only entries without an expiry timestamp, or recompute all entries
+- **Improved:** Retroactive tool description text updated to reflect the new processing mode option
+
 ### 1.2.2 - 2026-03-11
 - **Improved:** When the form has a single date field, it is automatically preselected in the Date Field dropdown
 - **Improved:** "Expire At" time picker is now visible for all three expiry types (including Fixed Date)

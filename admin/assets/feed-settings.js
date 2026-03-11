@@ -35,6 +35,7 @@
             var $status = $('#gf_aee_retroactive_status');
             var formId = $('[name="_gform_setting_retroactive_form_id"]').val();
             var feedId = $('#gf_aee_retroactive_feed_select').val();
+            var mode   = $('#gf_aee_retroactive_mode').val() || 'missing';
 
             if (!formId || !feedId) {
                 $status.text(strings.selectFormFeed);
@@ -50,6 +51,7 @@
                 nonce: strings.nonce,
                 form_id: formId,
                 feed_id: feedId,
+                mode: mode,
             }, function (response) {
                 $btn.prop('disabled', false);
                 $spinner.removeClass('is-active');

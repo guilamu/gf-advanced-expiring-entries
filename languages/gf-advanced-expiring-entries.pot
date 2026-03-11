@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.2.2\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.2.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -604,7 +604,7 @@ msgid "Permanently Delete"
 msgstr ""
 
 #: includes/class-gf-aee-addon.php
-msgid "Please select a form and enter a feed ID."
+msgid "Please select a form and a feed."
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php
@@ -670,6 +670,26 @@ msgstr ""
 
 #: includes/class-gf-aee-addon.php
 msgid "Select a form and feed, then click \"Run\" to apply expiry rules to existing entries that do not yet have an expiry timestamp."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Select a form, a feed, and a processing mode, then click \"Run\" to apply expiry rules to existing entries."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Please select a form, a feed, and a processing mode."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Only entries without expiry timestamp"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "All entries (recompute all)"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Expiring Entries"
 msgstr ""
 
 #: includes/class-gf-aee-feed-settings.php

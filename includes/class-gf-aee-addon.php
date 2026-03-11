@@ -67,6 +67,10 @@ class GF_AEE_Addon extends GFFeedAddOn
     {
         parent::init();
 
+        // Register custom notification event so users can create notifications
+        // dedicated to expiry (won't fire on form submission).
+        add_filter('gform_notification_events', array($this, 'add_notification_events'), 10, 2);
+
         // Dashboard widget.
         add_action('wp_dashboard_setup', array('GF_AEE_Dashboard', 'register_widget'));
 
@@ -81,6 +85,23 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         // Dry-run banner.
         add_action('admin_notices', array($this, 'maybe_show_dry_run_notice'));
+    }
+
+    /**
+     * Add a custom "Expiring Entries" notification event to every form.
+     *
+     * This allows users to create GF notifications specifically for this plugin
+     * (pre-expiry, post-expiry, expiry action) that will never fire on form
+     * submission or any other standard GF event.
+     *
+     * @param array $events Existing notification events.
+     * @param array $form   The current form.
+     * @return array
+     */
+    public function add_notification_events($events, $form)
+    {
+        $events['gf_aee_expiry'] = esc_html__('Expiring Entries', 'gf-advanced-expiring-entries');
+        return $events;
     }
 
     /* ─── Feed settings ───────────────────────────────────────────────── */
@@ -355,7 +376,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             ),
             array(
                 'title'       => esc_html__('Recompute Expiry for Existing Entries', 'gf-advanced-expiring-entries'),
-                'description' => esc_html__('Select a form and feed, then click "Run" to apply expiry rules to existing entries that do not yet have an expiry timestamp.', 'gf-advanced-expiring-entries'),
+                'description' => esc_html__('Select a form, a feed, and a processing mode, then click "Run" to apply expiry rules to existing entries.', 'gf-advanced-expiring-entries'),
                 'fields'      => array(
                     array(
                         'name' => 'retroactive_tool',
@@ -388,15 +409,35 @@ class GF_AEE_Addon extends GFFeedAddOn
 
     /**
      * Helper: build form choices for the plugin settings page.
+     *
+     * Only includes forms that have at least one active Expiring Entries feed.
      */
     private static function get_form_choices()
     {
         $choices = array(
             array('label' => esc_html__('— Select a form —', 'gf-advanced-expiring-entries'), 'value' => ''),
         );
+        $addon = gf_aee();
+        if (! $addon) {
+            return $choices;
+        }
         $forms = GFAPI::get_forms();
         foreach ($forms as $form) {
-            $choices[] = array('label' => rgar($form, 'title'), 'value' => rgar($form, 'id'));
+            $form_id = rgar($form, 'id');
+            $feeds   = $addon->get_feeds($form_id);
+            // Only show forms that have at least one active AEE feed.
+            $has_active = false;
+            if (is_array($feeds)) {
+                foreach ($feeds as $feed) {
+                    if (rgar($feed, 'is_active')) {
+                        $has_active = true;
+                        break;
+                    }
+                }
+            }
+            if ($has_active) {
+                $choices[] = array('label' => rgar($form, 'title'), 'value' => $form_id);
+            }
         }
         return $choices;
     }
@@ -419,6 +460,10 @@ class GF_AEE_Addon extends GFFeedAddOn
             </select>
             <select id="gf_aee_retroactive_feed_select" name="_gform_setting_retroactive_feed_id" class="gform-input__select">
                 <option value=""><?php esc_html_e('— Select a form first —', 'gf-advanced-expiring-entries'); ?></option>
+            </select>
+            <select id="gf_aee_retroactive_mode" name="_gform_setting_retroactive_mode" class="gform-input__select">
+                <option value="missing"><?php esc_html_e('Only entries without expiry timestamp', 'gf-advanced-expiring-entries'); ?></option>
+                <option value="all"><?php esc_html_e('All entries (recompute all)', 'gf-advanced-expiring-entries'); ?></option>
             </select>
         </div>
         <div class="gf-aee-tool-action">
@@ -676,6 +721,10 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         $form_id = absint(rgpost('form_id'));
         $feed_id = absint(rgpost('feed_id'));
+        $mode    = sanitize_key(rgpost('mode'));
+        if (! in_array($mode, array('missing', 'all'), true)) {
+            $mode = 'missing';
+        }
 
         if (! $form_id || ! $feed_id) {
             wp_send_json_error(__('Missing form_id or feed_id.', 'gf-advanced-expiring-entries'));
@@ -691,7 +740,6 @@ class GF_AEE_Addon extends GFFeedAddOn
             wp_send_json_error(__('Form not found.', 'gf-advanced-expiring-entries'));
         }
 
-        // Find entries without expiry meta.
         $search_criteria = array('status' => 'active');
         $paging          = array('offset' => 0, 'page_size' => 50);
         $processed       = 0;
@@ -704,11 +752,14 @@ class GF_AEE_Addon extends GFFeedAddOn
             }
 
             foreach ($entries as $entry) {
-                $existing = GF_AEE_Meta::get($entry['id'], GF_AEE_Meta::EXPIRY_TS);
-                if (empty($existing)) {
-                    GF_AEE_Processor::process($feed, $entry, $form);
-                    $processed++;
+                if ($mode === 'missing') {
+                    $existing = GF_AEE_Meta::get($entry['id'], GF_AEE_Meta::EXPIRY_TS);
+                    if (! empty($existing)) {
+                        continue;
+                    }
                 }
+                GF_AEE_Processor::process($feed, $entry, $form);
+                $processed++;
             }
 
             $paging['offset'] += $paging['page_size'];
@@ -1193,7 +1244,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             $data['nonceExpiryCheck']   = wp_create_nonce('gf_aee_expiry_check');
             $data['nonceGetFeeds']      = wp_create_nonce('gf_aee_get_feeds');
             $data['nonceFilterLog']     = wp_create_nonce('gf_aee_filter_log');
-            $data['selectFormFeed']     = __('Please select a form and a feed.', 'gf-advanced-expiring-entries');
+            $data['selectFormFeed']     = __('Please select a form, a feed, and a processing mode.', 'gf-advanced-expiring-entries');
             $data['selectFormFirst']    = __('— Select a form first —', 'gf-advanced-expiring-entries');
             $data['loadingFeeds']       = __('Loading…', 'gf-advanced-expiring-entries');
             $data['noFeeds']            = __('— No feeds found —', 'gf-advanced-expiring-entries');
