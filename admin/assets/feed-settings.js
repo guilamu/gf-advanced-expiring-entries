@@ -340,6 +340,7 @@
         var formId  = $('#gf-aee-log-form').val()    || '';
         var action  = $('#gf-aee-log-action').val()   || '';
         var success = $('#gf-aee-log-success').val()   || 'all';
+        var period  = $('#gf-aee-log-period').val()    || 'all';
 
         $results.css('opacity', '0.5');
 
@@ -349,6 +350,7 @@
             form_id: formId,
             action_filter: action,
             success: success,
+            period: period,
             paged: page || 1,
         }, function (response) {
             $results.css('opacity', '1');
@@ -359,9 +361,14 @@
             $results.css('opacity', '1');
         });
 
-        // Show/hide reset button.
-        var hasFilters = formId || action || success !== 'all';
-        $('#gf-aee-log-reset').toggle(!!hasFilters);
+        // Grey out irrelevant filters when viewing future expirations.
+        var isFuture = period === 'future';
+        $('#gf-aee-log-action, #gf-aee-log-success').prop('disabled', isFuture);
+        if (isFuture) {
+            $('#gf-aee-log-action').val('');
+            $('#gf-aee-log-success').val('all');
+        }
+
     }
 
     function scheduleLogFilter() {
@@ -378,16 +385,7 @@
         if (!$wrap.length) return;
 
         // Live filter on select change.
-        $wrap.on('change', '#gf-aee-log-form, #gf-aee-log-action, #gf-aee-log-success', scheduleLogFilter);
-
-        // Reset button.
-        $wrap.on('click', '#gf-aee-log-reset', function (e) {
-            e.preventDefault();
-            $('#gf-aee-log-form').val('');
-            $('#gf-aee-log-action').val('');
-            $('#gf-aee-log-success').val('all');
-            loadLogResults(1);
-        });
+        $wrap.on('change', '#gf-aee-log-form, #gf-aee-log-action, #gf-aee-log-success, #gf-aee-log-period', scheduleLogFilter);
 
         // AJAX pagination — intercept clicks inside the results container.
         $(document).on('click', '#gf-aee-log-results .tablenav-pages a', function (e) {

@@ -155,7 +155,7 @@ class GF_AEE_Log
             $page_base_url = admin_url('admin.php?page=gf_settings&subview=gf-advanced-expiring-entries');
         }
 
-        $per_page = 50;
+        $per_page = 10;
         $page_num = max(1, isset($_GET['paged']) ? absint($_GET['paged']) : 1); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -165,7 +165,25 @@ class GF_AEE_Log
             'success' => isset($_GET['gf_aee_success']) ? sanitize_key($_GET['gf_aee_success'])     : 'all',
         );
 
-        $forms = GFAPI::get_forms(true, false, 'title', 'ASC');
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $period = isset($_GET['gf_aee_period']) ? sanitize_key($_GET['gf_aee_period']) : 'all';
+        if (! in_array($period, array('all', 'past', 'future'), true)) {
+            $period = 'all';
+        }
+
+        // Only show forms that have at least one Expiring Entries feed.
+        $all_forms = GFAPI::get_forms(true, false, 'title', 'ASC');
+        $addon     = gf_aee();
+        $forms     = array();
+        if ($addon) {
+            foreach ($all_forms as $form) {
+                if (! empty($addon->get_feeds(rgar($form, 'id')))) {
+                    $forms[] = $form;
+                }
+            }
+        } else {
+            $forms = $all_forms;
+        }
 
         $action_slugs = array('trash', 'delete', 'change_status', 'update_field', 'webhook', 'notification', 'skip');
 
@@ -178,8 +196,6 @@ class GF_AEE_Log
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
             'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
         );
-
-        $has_filters = $filters['form_id'] || $filters['action'] || $filters['success'] !== 'all';
 
         ?>
         <style>
@@ -224,12 +240,16 @@ class GF_AEE_Log
                     <option value="0"    <?php selected($filters['success'], '0');   ?>><?php esc_html_e('Failed only', 'gf-advanced-expiring-entries'); ?></option>
                 </select>
 
-                <a href="#" class="button" id="gf-aee-log-reset" style="<?php echo $has_filters ? '' : 'display:none;'; ?>"><?php esc_html_e('Reset', 'gf-advanced-expiring-entries'); ?></a>
+                <select id="gf-aee-log-period">
+                    <option value="all"    <?php selected($period, 'all'); ?>><?php esc_html_e('All expirations', 'gf-advanced-expiring-entries'); ?></option>
+                    <option value="past"   <?php selected($period, 'past'); ?>><?php esc_html_e('Past expirations', 'gf-advanced-expiring-entries'); ?></option>
+                    <option value="future" <?php selected($period, 'future'); ?>><?php esc_html_e('Future expirations', 'gf-advanced-expiring-entries'); ?></option>
+                </select>
 
             </div><!-- .gf-aee-log-filters -->
 
             <div id="gf-aee-log-results">
-                <?php self::render_results($filters, $page_num, $per_page); ?>
+                <?php self::render_results($filters, $page_num, $per_page, $period); ?>
             </div>
 
         </div><!-- .gf-aee-log-wrap -->
@@ -246,14 +266,50 @@ class GF_AEE_Log
      * @param int   $page_num  Current page (1-based).
      * @param int   $per_page  Items per page.
      */
-    public static function render_results($filters = array(), $page_num = 1, $per_page = 50)
+    public static function render_results($filters = array(), $page_num = 1, $per_page = 10, $period = 'all')
     {
-        $offset      = ($page_num - 1) * $per_page;
-        $total       = self::count_items($filters);
-        $items       = self::get_items($per_page, $offset, $filters);
+        $offset = ($page_num - 1) * $per_page;
+
+        // ── Collect rows depending on period ──────────────────────────
+        $past_rows   = array();
+        $future_rows = array();
+
+        if ($period !== 'future') {
+            $past_total = self::count_items($filters);
+            $raw_past   = ($period === 'past')
+                ? self::get_items($per_page, $offset, $filters)
+                : self::get_items(PHP_INT_MAX, 0, $filters); // fetch all for merge
+            $past_rows  = self::normalize_past_rows($raw_past);
+        }
+
+        if ($period !== 'past') {
+            $future_total = self::count_future_items($filters);
+            $raw_future   = ($period === 'future')
+                ? self::get_future_items($per_page, $offset, $filters)
+                : self::get_future_items(PHP_INT_MAX, 0, $filters);
+            $future_rows  = self::normalize_future_rows($raw_future);
+        }
+
+        // ── Merge / paginate ──────────────────────────────────────────
+        if ($period === 'past') {
+            $total = $past_total;
+            $items = $past_rows;
+        } elseif ($period === 'future') {
+            $total = $future_total;
+            $items = $future_rows;
+        } else {
+            // "all": merge both, sort by sort_ts descending, then paginate.
+            $merged = array_merge($future_rows, $past_rows);
+            usort($merged, function ($a, $b) {
+                return $b['sort_ts'] - $a['sort_ts'];
+            });
+            $total = count($merged);
+            $items = array_slice($merged, $offset, $per_page);
+        }
+
         $total_pages = max(1, (int) ceil($total / $per_page));
 
-        // Determine which entry IDs on this page still exist in GF (single IN query).
+        // ── Resolve entry links ──────────────────────────────────────
         $existing_entry_ids = array();
         if (! empty($items)) {
             global $wpdb;
@@ -262,16 +318,6 @@ class GF_AEE_Log
             // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
             $existing_entry_ids = array_map('intval', $wpdb->get_col("SELECT id FROM {$wpdb->prefix}gf_entry WHERE id IN ({$placeholders})"));
         }
-
-        $action_labels = array(
-            'trash'         => __('Trash', 'gf-advanced-expiring-entries'),
-            'delete'        => __('Delete', 'gf-advanced-expiring-entries'),
-            'change_status' => __('Change Status', 'gf-advanced-expiring-entries'),
-            'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
-            'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
-            'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
-            'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
-        );
 
         ?>
         <span class="gf-aee-count">
@@ -300,7 +346,7 @@ class GF_AEE_Log
                     </tr>
                 <?php else : foreach ($items as $row) : ?>
                     <tr>
-                        <td><?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($row['executed_at']))); ?></td>
+                        <td><?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), (int) $row['sort_ts'])); ?></td>
                         <td>
                             <?php
                             if (in_array((int) $row['entry_id'], $existing_entry_ids, true)) {
@@ -313,14 +359,8 @@ class GF_AEE_Log
                         </td>
                         <td><?php echo esc_html($row['form_id']); ?></td>
                         <td><?php echo esc_html($row['feed_id']); ?></td>
-                        <td><?php echo esc_html(isset($action_labels[$row['action']]) ? $action_labels[$row['action']] : $row['action']); ?></td>
-                        <td>
-                            <?php if ($row['success']) : ?>
-                                <span style="color:#00a32a">&#10003; <?php esc_html_e('OK', 'gf-advanced-expiring-entries'); ?></span>
-                            <?php else : ?>
-                                <span style="color:#d63638">&#10007; <?php esc_html_e('Fail', 'gf-advanced-expiring-entries'); ?></span>
-                            <?php endif; ?>
-                        </td>
+                        <td><?php echo esc_html($row['action_label']); ?></td>
+                        <td><?php echo $row['result_html']; // Already escaped in normalizers. ?></td>
                         <td><?php echo esc_html($row['message']); ?></td>
                     </tr>
                 <?php endforeach; endif; ?>
@@ -343,4 +383,200 @@ class GF_AEE_Log
         <?php endif; ?>
         <?php
     }
+
+    /**
+     * Normalize past log rows into unified format.
+     *
+     * @param array $rows Raw rows from get_items().
+     * @return array
+     */
+    private static function normalize_past_rows($rows)
+    {
+        $action_labels = array(
+            'trash'         => __('Trash', 'gf-advanced-expiring-entries'),
+            'delete'        => __('Delete', 'gf-advanced-expiring-entries'),
+            'change_status' => __('Change Status', 'gf-advanced-expiring-entries'),
+            'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
+            'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
+            'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
+        );
+
+        $items = array();
+        foreach ($rows as $row) {
+            $result_html = $row['success']
+                ? '<span style="color:#00a32a">&#10003; ' . esc_html__('OK', 'gf-advanced-expiring-entries') . '</span>'
+                : '<span style="color:#d63638">&#10007; ' . esc_html__('Fail', 'gf-advanced-expiring-entries') . '</span>';
+
+            $items[] = array(
+                'sort_ts'      => strtotime($row['executed_at']),
+                'entry_id'     => $row['entry_id'],
+                'form_id'      => $row['form_id'],
+                'feed_id'      => $row['feed_id'],
+                'action_label' => isset($action_labels[$row['action']]) ? $action_labels[$row['action']] : $row['action'],
+                'result_html'  => $result_html,
+                'message'      => $row['message'],
+            );
+        }
+        return $items;
+    }
+
+    /**
+     * Normalize future expiry rows into unified format.
+     *
+     * @param array $rows Raw rows from get_future_items().
+     * @return array
+     */
+    private static function normalize_future_rows($rows)
+    {
+        // Build feed → action lookup.
+        $feed_actions = array();
+        $addon = gf_aee();
+        if ($addon && ! empty($rows)) {
+            $feed_ids = array_unique(array_filter(array_map('intval', wp_list_pluck($rows, 'feed_id'))));
+            foreach ($feed_ids as $fid) {
+                $feed = $addon->get_feed($fid);
+                $feed_actions[$fid] = $feed ? rgars($feed, 'meta/expiry_action') : '';
+            }
+        }
+
+        $action_labels = array(
+            'trash'         => __('Trash', 'gf-advanced-expiring-entries'),
+            'delete'        => __('Delete', 'gf-advanced-expiring-entries'),
+            'change_status' => __('Change Status', 'gf-advanced-expiring-entries'),
+            'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
+            'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
+            'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+        );
+
+        $items = array();
+        foreach ($rows as $row) {
+            $fid         = (int) $row['feed_id'];
+            $action_slug = isset($feed_actions[$fid]) ? $feed_actions[$fid] : '';
+
+            if ($row['aee_status'] === GF_AEE_Meta::STATUS_EXTENDED) {
+                $result_html = '<span class="gf-aee-badge gf-aee-badge--extended">' . esc_html__('Extended', 'gf-advanced-expiring-entries') . '</span>';
+            } else {
+                $result_html = '<span class="gf-aee-badge gf-aee-badge--active">' . esc_html__('Active', 'gf-advanced-expiring-entries') . '</span>';
+            }
+
+            $items[] = array(
+                'sort_ts'      => (int) $row['effective_expiry_ts'],
+                'entry_id'     => $row['entry_id'],
+                'form_id'      => $row['form_id'],
+                'feed_id'      => $row['feed_id'],
+                'action_label' => isset($action_labels[$action_slug]) ? $action_labels[$action_slug] : $action_slug,
+                'result_html'  => $result_html,
+                'message'      => '',
+            );
+        }
+        return $items;
+    }
+
+    /* ── Future expirations ─────────────────────────────────────────── */
+
+    /**
+     * Count entries with a future effective expiry timestamp.
+     *
+     * @param array $filters {form_id}.
+     * @return int
+     */
+    public static function count_future_items($filters = array())
+    {
+        global $wpdb;
+        $meta_table  = GFFormsModel::get_entry_meta_table_name();
+        $entry_table = GFFormsModel::get_entry_table_name();
+        $now         = time();
+
+        $form_clause = '';
+        if (! empty($filters['form_id'])) {
+            $form_clause = $wpdb->prepare(' AND e.form_id = %d', (int) $filters['form_id']);
+        }
+
+        // phpcs:disable WordPress.DB.PreparedSQL
+        return (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT em_ts.entry_id)
+             FROM {$meta_table} AS em_ts
+             INNER JOIN {$meta_table} AS em_st
+               ON em_ts.entry_id = em_st.entry_id
+               AND em_st.meta_key = %s
+               AND em_st.meta_value IN (%s, %s)
+             LEFT JOIN {$meta_table} AS em_ov
+               ON em_ts.entry_id = em_ov.entry_id
+               AND em_ov.meta_key = %s
+             INNER JOIN {$entry_table} AS e
+               ON em_ts.entry_id = e.id
+             WHERE em_ts.meta_key = %s
+               AND e.status = 'active'
+               AND CAST(COALESCE(em_ov.meta_value, em_ts.meta_value) AS UNSIGNED) > %d
+               {$form_clause}",
+            GF_AEE_Meta::STATUS,
+            GF_AEE_Meta::STATUS_ACTIVE,
+            GF_AEE_Meta::STATUS_EXTENDED,
+            GF_AEE_Meta::OVERRIDE_TS,
+            GF_AEE_Meta::EXPIRY_TS,
+            $now
+        ));
+        // phpcs:enable
+    }
+
+    /**
+     * Fetch a page of entries with a future effective expiry timestamp.
+     *
+     * @param int   $per_page
+     * @param int   $offset
+     * @param array $filters {form_id}.
+     * @return array
+     */
+    public static function get_future_items($per_page = 10, $offset = 0, $filters = array())
+    {
+        global $wpdb;
+        $meta_table  = GFFormsModel::get_entry_meta_table_name();
+        $entry_table = GFFormsModel::get_entry_table_name();
+        $now         = time();
+
+        $form_clause = '';
+        if (! empty($filters['form_id'])) {
+            $form_clause = $wpdb->prepare(' AND e.form_id = %d', (int) $filters['form_id']);
+        }
+
+        // phpcs:disable WordPress.DB.PreparedSQL
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT em_ts.entry_id,
+                    e.form_id,
+                    em_fd.meta_value AS feed_id,
+                    em_st.meta_value AS aee_status,
+                    CAST(COALESCE(em_ov.meta_value, em_ts.meta_value) AS UNSIGNED) AS effective_expiry_ts
+             FROM {$meta_table} AS em_ts
+             INNER JOIN {$meta_table} AS em_st
+               ON em_ts.entry_id = em_st.entry_id
+               AND em_st.meta_key = %s
+               AND em_st.meta_value IN (%s, %s)
+             LEFT JOIN {$meta_table} AS em_ov
+               ON em_ts.entry_id = em_ov.entry_id
+               AND em_ov.meta_key = %s
+             LEFT JOIN {$meta_table} AS em_fd
+               ON em_ts.entry_id = em_fd.entry_id
+               AND em_fd.meta_key = %s
+             INNER JOIN {$entry_table} AS e
+               ON em_ts.entry_id = e.id
+             WHERE em_ts.meta_key = %s
+               AND e.status = 'active'
+               AND CAST(COALESCE(em_ov.meta_value, em_ts.meta_value) AS UNSIGNED) > %d
+               {$form_clause}
+             ORDER BY effective_expiry_ts ASC
+             LIMIT %d OFFSET %d",
+            GF_AEE_Meta::STATUS,
+            GF_AEE_Meta::STATUS_ACTIVE,
+            GF_AEE_Meta::STATUS_EXTENDED,
+            GF_AEE_Meta::OVERRIDE_TS,
+            GF_AEE_Meta::FEED_ID,
+            GF_AEE_Meta::EXPIRY_TS,
+            $now,
+            $per_page,
+            $offset
+        ), ARRAY_A);
+        // phpcs:enable
+    }
+
 }

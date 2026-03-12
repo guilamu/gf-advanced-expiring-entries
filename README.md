@@ -121,6 +121,14 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.4 - 2026-03-12
+- **New:** Expiry Log now shows future expirations — entries scheduled to expire are displayed in the same table with expiry date, feed action, and status badges
+- **New:** Period filter in the Expiry Log: "All expirations" (default), "Past expirations", and "Future expirations" — live AJAX filtering like all other dropdowns
+- **Improved:** When "Future expirations" is selected, the Action and Success filters are greyed out (disabled) since they don't apply
+- **Improved:** Expiry Log form dropdown now only lists forms that have at least one Expiring Entries feed
+- **Improved:** Expiry Log now displays 10 entries per page (down from 50) for faster loading
+- **Improved:** Feed add-on short title is now translatable — French displays "Flux d'expiration" instead of "Flux Expiring Entries"
+
 ### 1.2.3 - 2026-03-11
 - **New:** Custom "Expiring Entries" notification event — create dedicated GF notifications that won't fire on form submission, designed for pre-expiry, post-expiry, or expiry action use
 - **Improved:** Retroactive tool form dropdown now only shows forms that have at least one active Expiring Entries feed

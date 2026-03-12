@@ -826,9 +826,13 @@ class GF_AEE_Addon extends GFFeedAddOn
             $filters['success'] = 'all';
         }
         $page_num = max(1, absint(rgpost('paged')));
+        $period   = sanitize_key(rgpost('period'));
+        if (! in_array($period, array('all', 'past', 'future'), true)) {
+            $period = 'all';
+        }
 
         ob_start();
-        GF_AEE_Log::render_results($filters, $page_num);
+        GF_AEE_Log::render_results($filters, $page_num, 10, $period);
         $html = ob_get_clean();
 
         wp_send_json_success(array('html' => $html));
@@ -1295,6 +1299,13 @@ class GF_AEE_Addon extends GFFeedAddOn
             ),
         );
         return array_merge(parent::styles(), $styles);
+    }
+
+    /* ─── Short title (translatable) ──────────────────────────────────── */
+
+    public function get_short_title()
+    {
+        return esc_html_x('Expiring Entries', 'feed add-on short title', 'gf-advanced-expiring-entries');
     }
 
     /* ─── Menu icon ───────────────────────────────────────────────────── */
