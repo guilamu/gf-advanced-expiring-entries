@@ -121,6 +121,11 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.2.5 - 2026-03-30
+- **Improved:** GitHub updater rewritten — "View details" modal now shows Description, Installation, FAQ, and Changelog tabs parsed from README.md using Parsedown
+- **Improved:** "View details" thickbox link added to the plugin row on the Plugins page
+- **Improved:** Sidebar in the plugin details modal shows "Requires Gravity Forms" for GF add-on compatibility
+
 ### 1.2.4 - 2026-03-12
 - **New:** Expiry Log now shows future expirations — entries scheduled to expire are displayed in the same table with expiry date, feed action, and status badges
 - **New:** Period filter in the Expiry Log: "All expirations" (default), "Past expirations", and "Future expirations" — live AJAX filtering like all other dropdowns

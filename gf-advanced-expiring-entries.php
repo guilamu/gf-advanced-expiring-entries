@@ -4,7 +4,7 @@
  * Plugin Name: GF Advanced Expiring Entries
  * Plugin URI:  https://github.com/guilamu/gf-advanced-expiring-entries
  * Description: Configure per-form expiration rules (feeds) for Gravity Forms entries. Supports fixed and dynamic expiry, multiple actions, pre-expiry notifications, and admin overrides.
- * Version: 1.2.4
+ * Version: 1.2.5
  * Author: Guilamu
  * Author URI: https://github.com/guilamu
  * Text Domain: gf-advanced-expiring-entries
@@ -23,7 +23,7 @@ if (! defined('GF_AEE_DEBUG')) {
     define('GF_AEE_DEBUG', false);
 }
 
-define('GF_AEE_VERSION', '1.2.4');
+define('GF_AEE_VERSION', '1.2.5');
 define('GF_AEE_PLUGIN_FILE', __FILE__);
 define('GF_AEE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('GF_AEE_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -124,6 +124,18 @@ function gf_aee_plugin_row_meta($links, $file)
     if (plugin_basename(GF_AEE_PLUGIN_FILE) !== $file) {
         return $links;
     }
+
+    // "View details" thickbox link — same pattern as WordPress.org-hosted plugins.
+    $links[] = sprintf(
+        '<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+        esc_url(self_admin_url(
+            'plugin-install.php?tab=plugin-information&plugin=gf-advanced-expiring-entries'
+            . '&TB_iframe=true&width=772&height=926'
+        )),
+        esc_attr__('More information about GF Advanced Expiring Entries', 'gf-advanced-expiring-entries'),
+        esc_attr__('GF Advanced Expiring Entries', 'gf-advanced-expiring-entries'),
+        esc_html__('View details', 'gf-advanced-expiring-entries')
+    );
 
     if (class_exists('Guilamu_Bug_Reporter')) {
         $links[] = sprintf(
