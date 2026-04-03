@@ -35,9 +35,9 @@ jobs:
           if not changelog_block:
               sys.exit("❌ No '## Changelog' section found in README.md")
 
-          # Find the first ### X.Y.Z entry
+          # Find the first ### X.Y.Z entry (with optional date suffix like " - 2026-04-03")
           version_match = re.search(
-              r'### (\d+\.\d+[\.\d]*)\s*\n(.*?)(?=\n### |\Z)',
+              r'### (\d+\.\d+(?:\.\d+)*)(?:\s*-\s*\d{4}-\d{2}-\d{2})?\s*\n(.*?)(?=\n### |\Z)',
               changelog_block.group(1),
               re.DOTALL
           )
