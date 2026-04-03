@@ -4,7 +4,7 @@
  * GF_AEE_Scheduler — wp_cron-based scheduling for expiry checks.
  *
  * Follows the exact same pattern as gp-notification-scheduler:
- * setup_cron() is called from pre_init(), registers the custom schedule,
+ * setup_cron() is called from init(), registers the custom schedule,
  * the event, and the listener all in one method.
  */
 
@@ -23,9 +23,8 @@ class GF_AEE_Scheduler
      *
      * Reads the option directly from the database instead of calling
      * gf_aee()->get_plugin_settings(), because this method can be
-     * invoked during pre_init() before the singleton is fully
-     * constructed — calling gf_aee() at that point would re-enter
-     * get_instance() and cause infinite recursion.
+     * invoked during init() before settings helpers are fully
+     * available.
      */
     public static function get_interval()
     {
@@ -44,7 +43,8 @@ class GF_AEE_Scheduler
 
     /**
      * Bootstrap cron: register custom schedule, schedule the event, add listener.
-     * Must be called from pre_init() so it runs before any entry processing.
+     * Called from init() to avoid triggering translation loading too early
+     * (wp_schedule_event → wp_get_schedules → cron_schedules filter → __()).
      *
      * Self-healing: if the scheduled event is overdue (cron not spawning),
      * we reschedule for the future and run the check inline with a

@@ -50,22 +50,13 @@ class GF_AEE_Addon extends GFFeedAddOn
 
     /* ─── Init ────────────────────────────────────────────────────────── */
 
-    /**
-     * Early init — fires before init(). Used to register wp_cron events
-     * so they are ready before any entry processing occurs.
-     */
-    public function pre_init()
-    {
-        parent::pre_init();
-
-        if ($this->is_gravityforms_supported()) {
-            GF_AEE_Scheduler::setup_cron();
-        }
-    }
-
     public function init()
     {
         parent::init();
+
+        // Register cron scheduler at init (not pre_init) to avoid triggering
+        // translation loading too early via the cron_schedules filter.
+        GF_AEE_Scheduler::setup_cron();
 
         // Register custom notification event so users can create notifications
         // dedicated to expiry (won't fire on form submission).
