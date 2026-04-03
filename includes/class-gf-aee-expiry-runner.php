@@ -180,6 +180,43 @@ class GF_AEE_Expiry_Runner
                 }
                 break;
 
+            case 'anonymize':
+                $form_obj = is_wp_error($form)
+                    ? GFAPI::get_form(rgar($entry, 'form_id'))
+                    : $form;
+
+                if (is_wp_error($form_obj) || empty($form_obj['fields'])) {
+                    $success = false;
+                    break;
+                }
+
+                // Step 1 — optionally delete physical files BEFORE clearing field values.
+                if (! empty($meta['anonymize_delete_files'])) {
+                    self::delete_entry_files($entry, $form_obj);
+                }
+
+                // Step 2 — blank every numeric (field-ID) key in the entry array.
+                $anonymized_entry = $entry;
+                foreach ($anonymized_entry as $key => $value) {
+                    if (is_numeric($key)) {
+                        $anonymized_entry[$key] = '';
+                    }
+                }
+
+                // Step 3 — optionally clear personal metadata columns.
+                if (! empty($meta['anonymize_clear_ip'])) {
+                    $anonymized_entry['ip']         = '';
+                    $anonymized_entry['source_url'] = '';
+                }
+                if (! empty($meta['anonymize_clear_created_by'])) {
+                    $anonymized_entry['created_by'] = '0';
+                }
+
+                // Step 4 — persist to the database.
+                $result  = GFAPI::update_entry($anonymized_entry);
+                $success = ! is_wp_error($result) && $result === true;
+                break;
+
             default:
                 /**
                  * Allow third-party actions to be handled via filter/hook.
@@ -324,5 +361,59 @@ class GF_AEE_Expiry_Runner
     {
         global $wpdb;
         return $wpdb->prefix . 'gf_aee_deleted_entries';
+    }
+
+    /**
+     * Delete physical files attached to fileupload fields in an entry.
+     *
+     * Single-file and multi-file upload fields are both handled.
+     * Uses wp_delete_file() so other plugins can hook into the
+     * 'wp_delete_file' filter if needed.
+     *
+     * @param array $entry    GF entry array (before anonymization).
+     * @param array $form_obj GF form array.
+     */
+    private static function delete_entry_files( array $entry, array $form_obj ): void {
+
+        $upload_dir = wp_get_upload_dir();
+
+        foreach ( $form_obj['fields'] as $field ) {
+
+            if ( $field->type !== 'fileupload' ) {
+                continue;
+            }
+
+            $file_val = rgar( $entry, (string) $field->id );
+            if ( empty( $file_val ) ) {
+                continue;
+            }
+
+            // Multi-file fields store a JSON-encoded array of URLs.
+            $urls = $field->multipleFiles
+                ? (array) json_decode( $file_val, true )
+                : array( $file_val );
+
+            foreach ( $urls as $file_url ) {
+                if ( empty( $file_url ) || ! is_string( $file_url ) ) {
+                    continue;
+                }
+
+                // Map URL → absolute filesystem path.
+                $file_path = str_replace(
+                    trailingslashit( $upload_dir['baseurl'] ),
+                    trailingslashit( $upload_dir['basedir'] ),
+                    $file_url
+                );
+
+                if ( is_file( $file_path ) ) {
+                    wp_delete_file( $file_path );
+                    self::addon_log( sprintf(
+                        'Anonymize: deleted file %s (entry #%d)',
+                        $file_path,
+                        rgar( $entry, 'id' )
+                    ) );
+                }
+            }
+        }
     }
 }

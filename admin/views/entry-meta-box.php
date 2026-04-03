@@ -4,11 +4,12 @@
  * Entry meta-box — rendered in the entry detail sidebar.
  *
  * Variables available:
- *   $entry_id   (int)
- *   $status     (string|null)
- *   $expiry_ts  (int|null)
- *   $override   (int|null)
- *   $action_log (array)
+ *   $entry_id       (int)
+ *   $status         (string|null)
+ *   $expiry_ts      (int|null)
+ *   $override       (int|null)
+ *   $action_log     (array)
+ *   $feed_summaries (array)  — each element: ['name' => string, 'summary' => string]
  */
 
 defined('ABSPATH') || exit;
@@ -50,6 +51,16 @@ $override_val = $override ? wp_date('Y-m-d\TH:i', $override) : '';
                 </tr>
             <?php endif; ?>
         </table>
+
+        <?php if (! empty($feed_summaries)) : ?>
+            <hr />
+            <p><strong><?php esc_html_e('Scheduled Action', 'gf-advanced-expiring-entries'); ?></strong></p>
+            <?php foreach ($feed_summaries as $fs) : ?>
+                <p class="gf-aee-feed-summary-line" style="margin:4px 0;">
+                    <?php echo esc_html($fs['summary']); ?>
+                </p>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
         <hr />
 

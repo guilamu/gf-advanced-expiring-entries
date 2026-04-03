@@ -18,6 +18,7 @@ A Gravity Forms Feed Add-On that lets you create per-form expiration rules for e
 - **Update a Field Value** — set any field to a new value on expiry
 - **Fire a Webhook** — send entry data to an external URL (POST or GET)
 - **Trigger a GF Notification** — fire any existing Gravity Forms notification
+- **Anonymize** — wipe all field values from the entry while keeping the entry row itself, preserving submission counts; optionally clear IP/URL, user reference, and delete uploaded files
 
 ## Key Features
 
@@ -120,6 +121,11 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 ```
 
 ## Changelog
+
+### 1.3.0 - 2026-04-03
+- **New:** Anonymize expiry action — wipes all field values from the entry while keeping the entry row itself, preserving submission counts and petition totals
+- **New:** Optional sub-settings for anonymization: clear IP address and source URL, clear "Created by" user reference, delete uploaded files from disk
+- **Improved:** Feed summary and feed list column now display the new Anonymize action
 
 ### 1.2.5 - 2026-03-30
 - **Improved:** GitHub updater rewritten — "View details" modal now shows Description, Installation, FAQ, and Changelog tabs parsed from README.md using Parsedown

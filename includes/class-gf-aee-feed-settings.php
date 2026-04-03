@@ -148,6 +148,15 @@ class GF_AEE_Feed_Settings
             array('label' => esc_html__('Update a field value', 'gf-advanced-expiring-entries'), 'value' => 'update_field'),
             array('label' => esc_html__('Fire a webhook', 'gf-advanced-expiring-entries'),      'value' => 'webhook'),
             array('label' => esc_html__('Trigger a GF notification', 'gf-advanced-expiring-entries'), 'value' => 'notification'),
+            array(
+                'label'   => esc_html__('Anonymize entry (clear fields, keep entry)', 'gf-advanced-expiring-entries'),
+                'value'   => 'anonymize',
+                'tooltip' => esc_attr__(
+                    'Wipes all field values from the entry while keeping the entry itself, '
+                    . 'so submission counts and petition totals are preserved.',
+                    'gf-advanced-expiring-entries'
+                ),
+            ),
         ));
 
         return array(
@@ -239,6 +248,42 @@ class GF_AEE_Feed_Settings
                         'live'   => true,
                         'fields' => array(
                             array('field' => 'expiry_action', 'values' => array('notification')),
+                        ),
+                    ),
+                ),
+                // anonymize → optional sub-settings (visible only when action = anonymize).
+                array(
+                    'label'      => esc_html__('Anonymize Options', 'gf-advanced-expiring-entries'),
+                    'type'       => 'checkbox',
+                    'name'       => 'anonymize_options',
+                    'choices'    => array(
+                        array(
+                            'label' => esc_html__('Clear IP address and source URL', 'gf-advanced-expiring-entries'),
+                            'name'  => 'anonymize_clear_ip',
+                        ),
+                        array(
+                            'label' => esc_html__(
+                                'Clear "Created by" user reference',
+                                'gf-advanced-expiring-entries'
+                            ),
+                            'name'  => 'anonymize_clear_created_by',
+                        ),
+                        array(
+                            'label'   => esc_html__(
+                                'Delete uploaded files from disk',
+                                'gf-advanced-expiring-entries'
+                            ),
+                            'name'    => 'anonymize_delete_files',
+                            'tooltip' => esc_attr__(
+                                'Physically removes files from the server. This is irreversible.',
+                                'gf-advanced-expiring-entries'
+                            ),
+                        ),
+                    ),
+                    'dependency' => array(
+                        'live'   => true,
+                        'fields' => array(
+                            array('field' => 'expiry_action', 'values' => array('anonymize')),
                         ),
                     ),
                 ),

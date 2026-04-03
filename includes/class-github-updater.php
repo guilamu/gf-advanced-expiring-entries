@@ -276,14 +276,57 @@ class GF_AEE_GitHub_Updater
         }
 
         echo '<style>'
+            // Section heading fixes.
             . '#section-holder .section h2 { margin: 1.5em 0 0.5em; clear: none; }'
             . '#section-holder .section h3 { margin: 1.5em 0 0.5em; }'
             . '#section-holder .section > :first-child { margin-top: 0; }'
+            // Div-based table layout (wp_kses strips real <table> tags).
             . '.md-table { display: table; width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 13px; }'
             . '.md-tr { display: table-row; }'
             . '.md-tr > span { display: table-cell; padding: 6px 10px; border: 1px solid #ddd; vertical-align: top; }'
             . '.md-th > span { font-weight: 600; background: #f5f5f5; }'
+            // CSS-only geometric pattern banner (no external image needed).
+            . '#plugin-information-title.with-banner {'
+            .   '--s: 27px;'
+            .   '--c1: #b2b2b2;'
+            .   '--c2: #ffffff;'
+            .   '--c3: #d9d9d9;'
+            .   '--_g: var(--c3) 0 120deg, #0000 0;'
+            .   'background:'
+            .     'conic-gradient(from -60deg at 50% calc(100%/3), var(--_g)),'
+            .     'conic-gradient(from 120deg at 50% calc(200%/3), var(--_g)),'
+            .     'conic-gradient(from 60deg at calc(200%/3), var(--c3) 60deg, var(--c2) 0 120deg, #0000 0),'
+            .     'conic-gradient(from 180deg at calc(100%/3), var(--c1) 60deg, var(--_g)),'
+            .     'linear-gradient(90deg, var(--c1) calc(100%/6), var(--c2) 0 50%,'
+            .                           'var(--c1) 0 calc(500%/6), var(--c2) 0) !important;'
+            .   'background-size: calc(1.732 * var(--s)) var(--s) !important;'
+            . '}'
+            // H2 title pill at bottom of banner.
+            . '#plugin-information-title.with-banner h2 {'
+            .   'position: relative;'
+            .   'font-family: "Helvetica Neue", sans-serif;'
+            .   'display: inline-block;'
+            .   'font-size: 30px;'
+            .   'line-height: 1.68;'
+            .   'box-sizing: border-box;'
+            .   'max-width: 100%;'
+            .   'padding: 0 15px;'
+            .   'margin-top: 174px;'
+            .   'color: #fff;'
+            .   'background: rgba(29, 35, 39, 0.9);'
+            .   'text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);'
+            .   'box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);'
+            .   'border-radius: 8px;'
+            . '}'
             . '</style>';
+
+        // JS: Add the with-banner class so WordPress activates the banner area.
+        echo '<script>'
+            . 'document.addEventListener("DOMContentLoaded",function(){'
+            .   'var t=document.getElementById("plugin-information-title");'
+            .   'if(t){t.classList.add("with-banner");}'
+            . '});'
+            . '</script>';
 
         // Gravity Forms add-on: add sidebar "Requires Gravity Forms" line.
         if (defined('self::REQUIRES_GF')) {

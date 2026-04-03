@@ -155,6 +155,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
             'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'anonymize'     => __('Anonymize', 'gf-advanced-expiring-entries'),
         );
         $action = rgars($feed, 'meta/expiry_action');
         return esc_html(isset($actions[$action]) ? $actions[$action] : $action);
@@ -278,6 +279,25 @@ class GF_AEE_Addon extends GFFeedAddOn
         // Only show the box if entry has expiry data.
         if (! $status && ! $expiry_ts) {
             return;
+        }
+
+        // Build a summary sentence for each active feed on this form.
+        $feed_summaries = array();
+        $form_id = rgar($form, 'id');
+        $feeds   = $this->get_feeds($form_id);
+        if (is_array($feeds)) {
+            foreach ($feeds as $feed) {
+                if (rgar($feed, 'is_active')) {
+                    $meta    = rgar($feed, 'meta', array());
+                    $summary = self::build_feed_summary($meta, $form);
+                    if ($summary) {
+                        $feed_summaries[] = array(
+                            'name'    => rgar($meta, 'feed_name', __('Unnamed feed', 'gf-advanced-expiring-entries')),
+                            'summary' => $summary,
+                        );
+                    }
+                }
+            }
         }
 
         include GF_AEE_PLUGIN_DIR . 'admin/views/entry-meta-box.php';
@@ -1019,6 +1039,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             'update_field'  => '',
             'webhook'       => __('a webhook is fired', 'gf-advanced-expiring-entries'),
             'notification'  => '',
+            'anonymize'     => __('the entry is anonymized (fields cleared, entry kept)', 'gf-advanced-expiring-entries'),
         );
 
         if ($action === 'change_status') {
