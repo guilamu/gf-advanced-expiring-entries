@@ -122,6 +122,9 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.3.2 - 2026-09-24
+- **Improved:** The "Expires" column is hidden from the entry list when the form has no active expiry feed
+
 ### 1.3.1 - 2026-04-03
 - **Fixed:** WordPress 6.7+ "Translation loading triggered too early" warning — moved cron scheduler setup from `pre_init()` to `init()` action
 

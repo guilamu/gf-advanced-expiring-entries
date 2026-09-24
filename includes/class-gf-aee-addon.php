@@ -193,9 +193,16 @@ class GF_AEE_Addon extends GFFeedAddOn
 
     /**
      * Add an "Expires" column to the entry list, before the last (cogwheel) column.
+     * The column is hidden when the form has no active expiry feed.
      */
     public function add_expiry_column($columns, $form_id)
     {
+        if (empty($this->get_active_feeds($form_id))) {
+            // Also drop it if the user selected it via the column picker.
+            unset($columns[GF_AEE_Meta::EXPIRY_TS]);
+            return $columns;
+        }
+
         $keys   = array_keys($columns);
         $values = array_values($columns);
 
