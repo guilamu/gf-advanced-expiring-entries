@@ -98,14 +98,14 @@ class GF_AEE_Trash_Purge
         $settings  = self::get_settings();
         $threshold = time() - $settings['days'] * DAY_IN_SECONDS;
         $legacy_ts = $settings['legacy'] === 'date_updated'
-            ? 'UNIX_TIMESTAMP(e.date_updated)'
+            ? 'UNIX_TIMESTAMP(COALESCE(e.date_updated, e.date_created))'
             : (string) time();
 
         // phpcs:disable WordPress.DB.PreparedSQL
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT e.form_id,
                     SUM(CASE WHEN COALESCE(CAST(m.meta_value AS UNSIGNED), {$legacy_ts}) <= %d THEN 1 ELSE 0 END) AS due,
-                    SUM(CASE WHEN m.meta_id IS NULL THEN 1 ELSE 0 END) AS untracked
+                    SUM(CASE WHEN m.id IS NULL THEN 1 ELSE 0 END) AS untracked
              FROM " . GFFormsModel::get_entry_table_name() . " e
              LEFT JOIN " . GFFormsModel::get_entry_meta_table_name() . " m ON m.entry_id = e.id AND m.meta_key = %s
              WHERE e.status = 'trash'" . self::excluded_sql($settings) . "
@@ -150,9 +150,9 @@ class GF_AEE_Trash_Purge
         // 1. Date the entries trashed before tracking existed (or by code bypassing gform_update_status).
         // phpcs:disable WordPress.DB.PreparedSQL
         $untracked = $wpdb->get_results($wpdb->prepare(
-            "SELECT e.id, e.form_id, e.date_updated FROM {$entry_table} e
+            "SELECT e.id, e.form_id, COALESCE(e.date_updated, e.date_created) AS date_updated FROM {$entry_table} e
              LEFT JOIN {$meta_table} m ON m.entry_id = e.id AND m.meta_key = %s
-             WHERE e.status = 'trash' AND m.meta_id IS NULL",
+             WHERE e.status = 'trash' AND m.id IS NULL",
             self::META
         ));
 

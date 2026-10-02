@@ -125,6 +125,10 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 
 ## Changelog
 
+### 1.5.1 - 2026-10-02
+- **Fixed:** Trash purge preview and dating of already-trashed entries failed silently — the Gravity Forms entry meta table key column is `id`, not `meta_id`
+- **Improved:** When an entry has no last-modification date, the "last modification date" option falls back to its creation date
+
 ### 1.5.0 - 2026-10-02
 - **New:** Automatic trash purge — permanently deletes, on every form, entries that have stayed in the trash longer than a retention period (365 days by default), with their uploaded files; runs daily in batches and logs each deletion in the Expiry Log
 - **New:** Trash date tracking — Gravity Forms does not record when an entry is trashed, so the date is stored in entry meta (`_gf_aee_trashed_at`) on every status change and removed when the entry is restored
