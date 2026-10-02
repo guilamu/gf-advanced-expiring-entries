@@ -19,7 +19,7 @@ A Gravity Forms Feed Add-On that lets you create per-form expiration rules for e
 - **Fire a Webhook** — send entry data to an external URL (POST or GET)
 - **Trigger a GF Notification** — fire any existing Gravity Forms notification
 - **Anonymize** — wipe all field values from the entry while keeping the entry row itself, preserving submission counts; optionally clear IP/URL, user reference, and delete uploaded files
-- **Delete Uploaded Files** — remove the files of every File Upload field from disk and clear those fields, keeping the entry and all its other values (e.g. keep expense claims but purge receipts after 2 months); a note listing the result is added to the entry
+- **Delete Uploaded Files** — remove the files of every File Upload field from disk and clear those fields, keeping the entry and all its other values (e.g. keep expense claims but purge receipts after 2 months); files referenced by entry meta, such as Gravity Wiz zip archives, are deleted too; a note listing the result is added to the entry
 
 ## Key Features
 
@@ -122,6 +122,10 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 ```
 
 ## Changelog
+
+### 1.4.1 - 2026-10-02
+- **Improved:** "Delete uploaded files" and Anonymize (with file deletion) also delete files referenced by entry meta, then clear that meta — by default the zip archive built by Gravity Wiz's "Zip Uploaded Files" snippet (`gw_zip`)
+- **New:** `gf_aee_delete_files_meta_keys` filter to declare other entry meta keys holding generated files
 
 ### 1.4.0 - 2026-10-02
 - **New:** "Delete uploaded files (keep entry)" expiry action — deletes File Upload files from disk and clears those fields only; the entry and its other values are kept, and an entry note reports deleted / failed / not-found files

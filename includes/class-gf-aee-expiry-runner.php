@@ -192,7 +192,10 @@ class GF_AEE_Expiry_Runner
 
                 // Step 1 — optionally delete physical files BEFORE clearing field values.
                 if (! empty($meta['anonymize_delete_files'])) {
-                    self::delete_entry_files($entry, $form_obj);
+                    $files = self::delete_entry_files($entry, $form_obj);
+                    foreach ($files['meta_keys'] as $meta_key) {
+                        gform_delete_meta($entry_id, $meta_key);
+                    }
                 }
 
                 // Step 2 — blank every numeric (field-ID) key in the entry array.
@@ -235,6 +238,10 @@ class GF_AEE_Expiry_Runner
                     $updated_entry[(string) $field_id] = '';
                 }
                 $result = $files['field_ids'] ? GFAPI::update_entry($updated_entry) : true;
+
+                foreach ($files['meta_keys'] as $meta_key) {
+                    gform_delete_meta($entry_id, $meta_key);
+                }
 
                 if ($files['deleted'] || $files['failed'] || $files['missing']) {
                     GFAPI::add_note(
@@ -407,14 +414,19 @@ class GF_AEE_Expiry_Runner
      * Uses wp_delete_file() so other plugins can hook into the
      * 'wp_delete_file' filter if needed.
      *
+     * Files referenced by entry meta (e.g. the zip archive built by Gravity Wiz's
+     * "Zip Uploaded Files" snippet, stored under the 'gw_zip' meta key) are deleted too.
+     *
      * @param array $entry    GF entry array (before anonymization).
      * @param array $form_obj GF form array.
-     * @return array{deleted:int, failed:int, missing:int, field_ids:int[]} field_ids lists the
-     *               fields whose files are all gone and can safely be cleared.
+     * @return array{deleted:int, failed:int, missing:int, field_ids:int[], meta_keys:string[]}
+     *               field_ids / meta_keys list the fields and meta whose files are all gone
+     *               and can safely be cleared.
      */
     private static function delete_entry_files( array $entry, array $form_obj ): array {
 
-        $report = array( 'deleted' => 0, 'failed' => 0, 'missing' => 0, 'field_ids' => array() );
+        $report   = array( 'deleted' => 0, 'failed' => 0, 'missing' => 0, 'field_ids' => array(), 'meta_keys' => array() );
+        $entry_id = (int) rgar( $entry, 'id' );
 
         foreach ( $form_obj['fields'] as $field ) {
 
@@ -427,42 +439,79 @@ class GF_AEE_Expiry_Runner
                 continue;
             }
 
-            $urls     = self::parse_file_urls( $file_val );
-            $all_gone = ! empty( $urls );
-
-            foreach ( $urls as $file_url ) {
-                if ( empty( $file_url ) || ! is_string( $file_url ) ) {
-                    continue;
-                }
-
-                $file_path = self::get_upload_path( $file_url, (int) rgar( $entry, 'id' ) );
-
-                if ( ! $file_path || ! is_file( $file_path ) ) {
-                    // Unresolvable URL or file already gone: keep the field value so nothing is lost silently.
-                    $report['missing']++;
-                    $all_gone = false;
-                    self::addon_log( sprintf( 'File not found for %s (entry #%d)', $file_url, rgar( $entry, 'id' ) ) );
-                    continue;
-                }
-
-                wp_delete_file( $file_path );
-
-                if ( is_file( $file_path ) ) {
-                    $report['failed']++;
-                    $all_gone = false;
-                    self::addon_log( sprintf( 'Could not delete file %s (entry #%d)', $file_path, rgar( $entry, 'id' ) ) );
-                } else {
-                    $report['deleted']++;
-                    self::addon_log( sprintf( 'Deleted file %s (entry #%d)', $file_path, rgar( $entry, 'id' ) ) );
-                }
-            }
-
-            if ( $all_gone ) {
+            if ( self::delete_file_urls( self::parse_file_urls( $file_val ), $entry_id, $report ) ) {
                 $report['field_ids'][] = (int) $field->id;
             }
         }
 
+        /**
+         * Filter the entry meta keys holding URLs of files generated for the entry
+         * (archives, exports…) that must be deleted along with the uploaded files.
+         *
+         * @param string[] $meta_keys Meta keys. Default: 'gw_zip' (Gravity Wiz Zip Uploaded Files).
+         * @param array    $entry     GF entry.
+         * @param array    $form_obj  GF form.
+         */
+        $meta_keys = (array) apply_filters( 'gf_aee_delete_files_meta_keys', array( 'gw_zip' ), $entry, $form_obj );
+
+        foreach ( $meta_keys as $meta_key ) {
+            $meta_val = gform_get_meta( $entry_id, $meta_key );
+            if ( empty( $meta_val ) ) {
+                continue;
+            }
+
+            $urls = is_array( $meta_val )
+                ? array_filter( $meta_val, 'is_string' )
+                : self::parse_file_urls( (string) $meta_val );
+
+            if ( self::delete_file_urls( $urls, $entry_id, $report ) ) {
+                $report['meta_keys'][] = (string) $meta_key;
+            }
+        }
+
         return $report;
+    }
+
+    /**
+     * Delete a set of uploaded files and update the report counters.
+     *
+     * @param string[] $urls     File URLs.
+     * @param int      $entry_id Entry ID.
+     * @param array    $report   Report updated in place (deleted / failed / missing).
+     * @return bool True when every file is now gone, so the value referencing them can be cleared.
+     */
+    private static function delete_file_urls( array $urls, int $entry_id, array &$report ): bool {
+
+        $all_gone = ! empty( $urls );
+
+        foreach ( $urls as $file_url ) {
+            if ( empty( $file_url ) || ! is_string( $file_url ) ) {
+                continue;
+            }
+
+            $file_path = self::get_upload_path( $file_url, $entry_id );
+
+            if ( ! $file_path || ! is_file( $file_path ) ) {
+                // Unresolvable URL or file already gone: keep the value so nothing is lost silently.
+                $report['missing']++;
+                $all_gone = false;
+                self::addon_log( sprintf( 'File not found for %s (entry #%d)', $file_url, $entry_id ) );
+                continue;
+            }
+
+            wp_delete_file( $file_path );
+
+            if ( is_file( $file_path ) ) {
+                $report['failed']++;
+                $all_gone = false;
+                self::addon_log( sprintf( 'Could not delete file %s (entry #%d)', $file_path, $entry_id ) );
+            } else {
+                $report['deleted']++;
+                self::addon_log( sprintf( 'Deleted file %s (entry #%d)', $file_path, $entry_id ) );
+            }
+        }
+
+        return $all_gone;
     }
 
     /**
