@@ -19,6 +19,7 @@ A Gravity Forms Feed Add-On that lets you create per-form expiration rules for e
 - **Fire a Webhook** — send entry data to an external URL (POST or GET)
 - **Trigger a GF Notification** — fire any existing Gravity Forms notification
 - **Anonymize** — wipe all field values from the entry while keeping the entry row itself, preserving submission counts; optionally clear IP/URL, user reference, and delete uploaded files
+- **Delete Uploaded Files** — remove the files of every File Upload field from disk and clear those fields, keeping the entry and all its other values (e.g. keep expense claims but purge receipts after 2 months); a note listing the result is added to the entry
 
 ## Key Features
 
@@ -121,6 +122,13 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 ```
 
 ## Changelog
+
+### 1.4.0 - 2026-10-02
+- **New:** "Delete uploaded files (keep entry)" expiry action — deletes File Upload files from disk and clears those fields only; the entry and its other values are kept, and an entry note reports deleted / failed / not-found files
+- **Improved:** Multi-file values are read whether stored as a JSON array or as a comma-separated list (also used by the Anonymize action)
+- **Improved:** File URLs are mapped to disk paths with Gravity Forms' own resolver, falling back to a path comparison that ignores http/https and www differences
+- **Improved:** A file field is only cleared once all of its files are actually gone from disk
+- **Improved:** Expiry log labels and filter now include the Anonymize and Delete files actions
 
 ### 1.3.2 - 2026-09-24
 - **Improved:** The "Expires" column is hidden from the entry list when the form has no active expiry feed

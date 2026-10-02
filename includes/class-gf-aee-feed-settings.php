@@ -157,6 +157,15 @@ class GF_AEE_Feed_Settings
                     'gf-advanced-expiring-entries'
                 ),
             ),
+            array(
+                'label'   => esc_html__('Delete uploaded files (keep entry)', 'gf-advanced-expiring-entries'),
+                'value'   => 'delete_files',
+                'tooltip' => esc_attr__(
+                    'Physically removes the files of every File Upload field and clears those fields. '
+                    . 'All other values and the entry itself are kept. This is irreversible.',
+                    'gf-advanced-expiring-entries'
+                ),
+            ),
         ));
 
         return array(

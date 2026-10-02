@@ -217,6 +217,43 @@ class GF_AEE_Expiry_Runner
                 $success = ! is_wp_error($result) && $result === true;
                 break;
 
+            case 'delete_files':
+                $form_obj = is_wp_error($form)
+                    ? GFAPI::get_form(rgar($entry, 'form_id'))
+                    : $form;
+
+                if (is_wp_error($form_obj) || empty($form_obj['fields'])) {
+                    $success = false;
+                    break;
+                }
+
+                $files = self::delete_entry_files($entry, $form_obj);
+
+                // Clear the file fields so the entry does not keep dead links.
+                $updated_entry = $entry;
+                foreach ($files['field_ids'] as $field_id) {
+                    $updated_entry[(string) $field_id] = '';
+                }
+                $result = $files['field_ids'] ? GFAPI::update_entry($updated_entry) : true;
+
+                if ($files['deleted'] || $files['failed'] || $files['missing']) {
+                    GFAPI::add_note(
+                        $entry_id,
+                        0,
+                        'GF Advanced Expiring Entries',
+                        sprintf(
+                            /* translators: 1: deleted files, 2: files that could not be deleted, 3: files not found on disk */
+                            __('Uploaded files deleted on expiry: %1$d deleted, %2$d failed, %3$d not found.', 'gf-advanced-expiring-entries'),
+                            $files['deleted'],
+                            $files['failed'],
+                            $files['missing']
+                        )
+                    );
+                }
+
+                $success = ! is_wp_error($result) && $result === true && 0 === $files['failed'];
+                break;
+
             default:
                 /**
                  * Allow third-party actions to be handled via filter/hook.
@@ -372,10 +409,12 @@ class GF_AEE_Expiry_Runner
      *
      * @param array $entry    GF entry array (before anonymization).
      * @param array $form_obj GF form array.
+     * @return array{deleted:int, failed:int, missing:int, field_ids:int[]} field_ids lists the
+     *               fields whose files are all gone and can safely be cleared.
      */
-    private static function delete_entry_files( array $entry, array $form_obj ): void {
+    private static function delete_entry_files( array $entry, array $form_obj ): array {
 
-        $upload_dir = wp_get_upload_dir();
+        $report = array( 'deleted' => 0, 'failed' => 0, 'missing' => 0, 'field_ids' => array() );
 
         foreach ( $form_obj['fields'] as $field ) {
 
@@ -388,32 +427,93 @@ class GF_AEE_Expiry_Runner
                 continue;
             }
 
-            // Multi-file fields store a JSON-encoded array of URLs.
-            $urls = $field->multipleFiles
-                ? (array) json_decode( $file_val, true )
-                : array( $file_val );
+            $urls     = self::parse_file_urls( $file_val );
+            $all_gone = ! empty( $urls );
 
             foreach ( $urls as $file_url ) {
                 if ( empty( $file_url ) || ! is_string( $file_url ) ) {
                     continue;
                 }
 
-                // Map URL → absolute filesystem path.
-                $file_path = str_replace(
-                    trailingslashit( $upload_dir['baseurl'] ),
-                    trailingslashit( $upload_dir['basedir'] ),
-                    $file_url
-                );
+                $file_path = self::get_upload_path( $file_url, (int) rgar( $entry, 'id' ) );
+
+                if ( ! $file_path || ! is_file( $file_path ) ) {
+                    // Unresolvable URL or file already gone: keep the field value so nothing is lost silently.
+                    $report['missing']++;
+                    $all_gone = false;
+                    self::addon_log( sprintf( 'File not found for %s (entry #%d)', $file_url, rgar( $entry, 'id' ) ) );
+                    continue;
+                }
+
+                wp_delete_file( $file_path );
 
                 if ( is_file( $file_path ) ) {
-                    wp_delete_file( $file_path );
-                    self::addon_log( sprintf(
-                        'Anonymize: deleted file %s (entry #%d)',
-                        $file_path,
-                        rgar( $entry, 'id' )
-                    ) );
+                    $report['failed']++;
+                    $all_gone = false;
+                    self::addon_log( sprintf( 'Could not delete file %s (entry #%d)', $file_path, rgar( $entry, 'id' ) ) );
+                } else {
+                    $report['deleted']++;
+                    self::addon_log( sprintf( 'Deleted file %s (entry #%d)', $file_path, rgar( $entry, 'id' ) ) );
                 }
             }
+
+            if ( $all_gone ) {
+                $report['field_ids'][] = (int) $field->id;
+            }
         }
+
+        return $report;
+    }
+
+    /**
+     * Extract the file URLs stored in a File Upload field value.
+     *
+     * Multi-file values are a JSON array, but some entries (older ones, or values seen
+     * through the REST API) hold a comma-separated list instead; both are accepted.
+     *
+     * @param string $file_val Raw field value.
+     * @return string[]
+     */
+    private static function parse_file_urls( string $file_val ): array {
+
+        $decoded = json_decode( $file_val, true );
+        $urls    = is_array( $decoded )
+            ? $decoded
+            : preg_split( '/,(?=\s*https?:\/\/)/i', $file_val );
+
+        return array_values( array_filter( array_map( 'trim', array_filter( (array) $urls, 'is_string' ) ) ) );
+    }
+
+    /**
+     * Map an uploaded file URL to its absolute path, whatever the scheme or host it was stored with.
+     *
+     * @param string $file_url URL stored in the entry.
+     * @param int    $entry_id Entry ID.
+     * @return string Absolute path, or '' when the URL is not under the uploads directory.
+     */
+    private static function get_upload_path( string $file_url, int $entry_id ): string {
+
+        if ( method_exists( 'GFFormsModel', 'get_physical_file_path' ) ) {
+            $path = GFFormsModel::get_physical_file_path( $file_url, $entry_id );
+            if ( $path && is_file( $path ) ) {
+                return $path;
+            }
+        }
+
+        // Fallback: compare URL paths so http/https or www/non-www differences do not matter.
+        $upload_dir = wp_get_upload_dir();
+        $base_path  = trailingslashit( (string) wp_parse_url( $upload_dir['baseurl'], PHP_URL_PATH ) );
+        $url_path   = rawurldecode( (string) wp_parse_url( $file_url, PHP_URL_PATH ) );
+
+        if ( 0 !== strpos( $url_path, $base_path ) ) {
+            return '';
+        }
+
+        $relative = substr( $url_path, strlen( $base_path ) );
+        if ( false !== strpos( $relative, '..' ) ) {
+            return '';
+        }
+
+        return trailingslashit( $upload_dir['basedir'] ) . $relative;
     }
 }

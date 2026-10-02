@@ -185,7 +185,7 @@ class GF_AEE_Log
             $forms = $all_forms;
         }
 
-        $action_slugs = array('trash', 'delete', 'change_status', 'update_field', 'webhook', 'notification', 'skip');
+        $action_slugs = array('trash', 'delete', 'change_status', 'update_field', 'webhook', 'notification', 'anonymize', 'delete_files', 'skip');
 
         $action_labels = array(
             'trash'         => __('Trash', 'gf-advanced-expiring-entries'),
@@ -194,6 +194,8 @@ class GF_AEE_Log
             'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
             'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'anonymize'     => __('Anonymize', 'gf-advanced-expiring-entries'),
+            'delete_files'  => __('Delete files', 'gf-advanced-expiring-entries'),
             'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
         );
 
@@ -399,6 +401,8 @@ class GF_AEE_Log
             'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
             'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'anonymize'     => __('Anonymize', 'gf-advanced-expiring-entries'),
+            'delete_files'  => __('Delete files', 'gf-advanced-expiring-entries'),
             'skip'          => __('Skipped', 'gf-advanced-expiring-entries'),
         );
 
@@ -447,6 +451,8 @@ class GF_AEE_Log
             'update_field'  => __('Update Field', 'gf-advanced-expiring-entries'),
             'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
+            'anonymize'     => __('Anonymize', 'gf-advanced-expiring-entries'),
+            'delete_files'  => __('Delete files', 'gf-advanced-expiring-entries'),
         );
 
         $items = array();

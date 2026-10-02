@@ -147,6 +147,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             'webhook'       => __('Webhook', 'gf-advanced-expiring-entries'),
             'notification'  => __('Notification', 'gf-advanced-expiring-entries'),
             'anonymize'     => __('Anonymize', 'gf-advanced-expiring-entries'),
+            'delete_files'  => __('Delete files', 'gf-advanced-expiring-entries'),
         );
         $action = rgars($feed, 'meta/expiry_action');
         return esc_html(isset($actions[$action]) ? $actions[$action] : $action);
@@ -1038,6 +1039,7 @@ class GF_AEE_Addon extends GFFeedAddOn
             'webhook'       => __('a webhook is fired', 'gf-advanced-expiring-entries'),
             'notification'  => '',
             'anonymize'     => __('the entry is anonymized (fields cleared, entry kept)', 'gf-advanced-expiring-entries'),
+            'delete_files'  => __('the uploaded files are deleted (entry kept)', 'gf-advanced-expiring-entries'),
         );
 
         if ($action === 'change_status') {

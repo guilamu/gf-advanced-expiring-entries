@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.3.2\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.4.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -945,4 +945,26 @@ msgstr ""
 
 #: includes/class-gf-aee-addon.php
 msgid "the entry is anonymized (fields cleared, entry kept)"
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Delete uploaded files (keep entry)"
+msgstr ""
+
+#: includes/class-gf-aee-feed-settings.php
+msgid "Physically removes the files of every File Upload field and clears those fields. All other values and the entry itself are kept. This is irreversible."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php includes/class-gf-aee-log.php
+msgid "Delete files"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "the uploaded files are deleted (entry kept)"
+msgstr ""
+
+#. translators: 1: deleted files, 2: files that could not be deleted, 3: files not found on disk
+#: includes/class-gf-aee-expiry-runner.php
+#, php-format
+msgid "Uploaded files deleted on expiry: %1$d deleted, %2$d failed, %3$d not found."
 msgstr ""
