@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: GF Advanced Expiring Entries 1.4.1\n"
+"Project-Id-Version: GF Advanced Expiring Entries 1.5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-11 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -967,4 +967,88 @@ msgstr ""
 #: includes/class-gf-aee-expiry-runner.php
 #, php-format
 msgid "Uploaded files deleted on expiry: %1$d deleted, %2$d failed, %3$d not found."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Trash Purge"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Permanently delete entries (with their uploaded files) that have stayed in the trash longer than the retention period, on every form. Runs once a day."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Automatic Purge"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Empty the trash automatically"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Retention in Trash (days)"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "days"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Entries Already in the Trash"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Gravity Forms does not record when an entry is trashed. The date is tracked from now on; choose how to date the entries that were already in the trash."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Start counting today (safest: nothing is deleted before the full retention period)"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Use the entry's last modification date (approximation: the entry may have been trashed later)"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Excluded Forms"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Comma-separated form IDs whose trashed entries are never purged."
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Preview"
+msgstr ""
+
+#. translators: 1: number of entries, 2: number of days
+#: includes/class-gf-aee-addon.php
+#, php-format
+msgid "%1$d trashed entries are older than %2$d days in the trash and would be deleted by the next run."
+msgstr ""
+
+#. translators: %d = number of entries
+#: includes/class-gf-aee-addon.php
+#, php-format
+msgid "%d trashed entries have no trash date yet: they will be dated on the next run as chosen above."
+msgstr ""
+
+#. translators: %s = date and time
+#: includes/class-gf-aee-addon.php
+#, php-format
+msgid "Next run: %s"
+msgstr ""
+
+#: includes/class-gf-aee-addon.php
+msgid "Automatic purge is disabled."
+msgstr ""
+
+#. translators: %d = number of days
+#: includes/class-gf-aee-trash-purge.php
+#, php-format
+msgid "Permanently deleted after more than %d days in the trash."
+msgstr ""
+
+#: includes/class-gf-aee-log.php
+msgid "Trash purge"
 msgstr ""

@@ -29,6 +29,7 @@ A Gravity Forms Feed Add-On that lets you create per-form expiration rules for e
 - **Dashboard Widget:** At-a-glance summary of active, expiring-soon, and expired entries per form
 - **Dry-Run Mode:** Log every action without executing, for safe testing before going live
 - **Retroactive Tool:** Apply expiry rules to existing entries that pre-date plugin installation
+- **Trash Purge:** Automatically and permanently delete entries left in the trash longer than a retention period (e.g. 1 year), on every form, with excluded forms and a preview
 - **Conditional Logic:** Process feeds only when specific field conditions are met
 - **Live Feed Summary:** Real-time human-readable description of the feed rule as you configure it
 - **Expiry Log:** Full audit log of every action with live AJAX filtering by form, action type, and result
@@ -111,6 +112,7 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 │   ├── class-gf-aee-expiry-runner.php  # Executes expiry actions per entry
 │   ├── class-gf-aee-feed-settings.php  # Feed settings field definitions
 │   ├── class-gf-aee-log.php            # Expiry event audit log
+│   ├── class-gf-aee-trash-purge.php    # Trash date tracking and automatic trash purge
 │   ├── class-gf-aee-meta.php           # Entry meta CRUD helpers
 │   ├── class-gf-aee-processor.php      # Computes expiry on submission
 │   ├── class-gf-aee-scheduler.php      # Self-healing wp_cron scheduling
@@ -122,6 +124,11 @@ Debug messages will appear in `wp-content/debug.log` (requires `WP_DEBUG_LOG`).
 ```
 
 ## Changelog
+
+### 1.5.0 - 2026-10-02
+- **New:** Automatic trash purge — permanently deletes, on every form, entries that have stayed in the trash longer than a retention period (365 days by default), with their uploaded files; runs daily in batches and logs each deletion in the Expiry Log
+- **New:** Trash date tracking — Gravity Forms does not record when an entry is trashed, so the date is stored in entry meta (`_gf_aee_trashed_at`) on every status change and removed when the entry is restored
+- **New:** Settings for entries already in the trash (start counting today, or use the last modification date), excluded forms, and a per-form preview of the next run
 
 ### 1.4.1 - 2026-10-02
 - **Improved:** "Delete uploaded files" and Anonymize (with file deletion) also delete files referenced by entry meta, then clear that meta — by default the zip archive built by Gravity Wiz's "Zip Uploaded Files" snippet (`gw_zip`)

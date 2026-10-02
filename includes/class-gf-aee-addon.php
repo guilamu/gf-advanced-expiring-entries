@@ -58,6 +58,9 @@ class GF_AEE_Addon extends GFFeedAddOn
         // translation loading too early via the cron_schedules filter.
         GF_AEE_Scheduler::setup_cron();
 
+        // Trash purge: track trash dates and schedule the daily purge.
+        GF_AEE_Trash_Purge::init();
+
         // Register custom notification event so users can create notifications
         // dedicated to expiry (won't fire on form submission).
         add_filter('gform_notification_events', array($this, 'add_notification_events'), 10, 2);
@@ -112,6 +115,9 @@ class GF_AEE_Addon extends GFFeedAddOn
 
         // Clear existing schedule and re-register with the new interval.
         GF_AEE_Scheduler::reschedule();
+
+        // Enable / disable the daily trash purge right away.
+        GF_AEE_Trash_Purge::sync_schedule();
     }
 
     public function feed_list_columns()
@@ -394,6 +400,62 @@ class GF_AEE_Addon extends GFFeedAddOn
                 ),
             ),
             array(
+                'title'       => esc_html__('Trash Purge', 'gf-advanced-expiring-entries'),
+                'description' => esc_html__('Permanently delete entries (with their uploaded files) that have stayed in the trash longer than the retention period, on every form. Runs once a day.', 'gf-advanced-expiring-entries'),
+                'fields'      => array(
+                    array(
+                        'label'   => esc_html__('Automatic Purge', 'gf-advanced-expiring-entries'),
+                        'type'    => 'checkbox',
+                        'name'    => 'enable_trash_purge',
+                        'choices' => array(
+                            array(
+                                'label' => esc_html__('Empty the trash automatically', 'gf-advanced-expiring-entries'),
+                                'name'  => 'enable_trash_purge',
+                            ),
+                        ),
+                    ),
+                    array(
+                        'label'         => esc_html__('Retention in Trash (days)', 'gf-advanced-expiring-entries'),
+                        'type'          => 'text',
+                        'name'          => 'trash_purge_days',
+                        'class'         => 'small',
+                        'input_type'    => 'number',
+                        'default_value' => '365',
+                        'after_input'   => ' ' . esc_html__('days', 'gf-advanced-expiring-entries'),
+                    ),
+                    array(
+                        'label'         => esc_html__('Entries Already in the Trash', 'gf-advanced-expiring-entries'),
+                        'type'          => 'radio',
+                        'name'          => 'trash_purge_legacy',
+                        'default_value' => 'now',
+                        'tooltip'       => esc_html__('Gravity Forms does not record when an entry is trashed. The date is tracked from now on; choose how to date the entries that were already in the trash.', 'gf-advanced-expiring-entries'),
+                        'choices'       => array(
+                            array(
+                                'label' => esc_html__('Start counting today (safest: nothing is deleted before the full retention period)', 'gf-advanced-expiring-entries'),
+                                'value' => 'now',
+                            ),
+                            array(
+                                'label' => esc_html__('Use the entry\'s last modification date (approximation: the entry may have been trashed later)', 'gf-advanced-expiring-entries'),
+                                'value' => 'date_updated',
+                            ),
+                        ),
+                    ),
+                    array(
+                        'label'       => esc_html__('Excluded Forms', 'gf-advanced-expiring-entries'),
+                        'type'        => 'text',
+                        'name'        => 'trash_purge_excluded_forms',
+                        'class'       => 'medium',
+                        'placeholder' => '193, 390',
+                        'tooltip'     => esc_html__('Comma-separated form IDs whose trashed entries are never purged.', 'gf-advanced-expiring-entries'),
+                    ),
+                    array(
+                        'label' => esc_html__('Preview', 'gf-advanced-expiring-entries'),
+                        'name'  => 'trash_purge_preview',
+                        'type'  => 'trash_purge_preview',
+                    ),
+                ),
+            ),
+            array(
                 'title'       => esc_html__('Recompute Expiry for Existing Entries', 'gf-advanced-expiring-entries'),
                 'description' => esc_html__('Select a form, a feed, and a processing mode, then click "Run" to apply expiry rules to existing entries.', 'gf-advanced-expiring-entries'),
                 'fields'      => array(
@@ -503,6 +565,67 @@ class GF_AEE_Addon extends GFFeedAddOn
     /**
      * Render the manual expiry check button (custom field type).
      */
+    /**
+     * Render the trash purge preview: what the next daily run would delete, per form.
+     */
+    public function settings_trash_purge_preview($field, $echo = true)
+    {
+        $preview  = GF_AEE_Trash_Purge::preview();
+        $settings = GF_AEE_Trash_Purge::get_settings();
+        $next     = wp_next_scheduled(GF_AEE_Trash_Purge::HOOK);
+
+        ob_start();
+        ?>
+        <div class="gf-aee-trash-purge-preview">
+            <p>
+                <?php
+                printf(
+                    /* translators: 1: number of entries, 2: number of days */
+                    esc_html__('%1$d trashed entries are older than %2$d days in the trash and would be deleted by the next run.', 'gf-advanced-expiring-entries'),
+                    (int) $preview['total'],
+                    (int) $settings['days']
+                );
+                ?>
+                <?php if ($preview['untracked']) : ?>
+                    <br />
+                    <?php
+                    printf(
+                        /* translators: %d = number of entries */
+                        esc_html__('%d trashed entries have no trash date yet: they will be dated on the next run as chosen above.', 'gf-advanced-expiring-entries'),
+                        (int) $preview['untracked']
+                    );
+                    ?>
+                <?php endif; ?>
+            </p>
+            <?php if ($preview['by_form']) : ?>
+                <ul style="margin:4px 0 0 1.5em;list-style:disc;">
+                    <?php foreach (array_slice($preview['by_form'], 0, 15, true) as $form_id => $count) :
+                        $form = GFAPI::get_form($form_id);
+                    ?>
+                        <li><?php echo esc_html(sprintf('#%d %s : %d', $form_id, $form ? $form['title'] : '?', $count)); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <p class="description">
+                <?php
+                echo $settings['enabled'] && $next
+                    ? esc_html(sprintf(
+                        /* translators: %s = date and time */
+                        __('Next run: %s', 'gf-advanced-expiring-entries'),
+                        wp_date(get_option('date_format') . ' ' . get_option('time_format'), $next)
+                    ))
+                    : esc_html__('Automatic purge is disabled.', 'gf-advanced-expiring-entries');
+                ?>
+            </p>
+        </div>
+<?php
+        $html = ob_get_clean();
+        if ($echo) {
+            echo $html; // phpcs:ignore WordPress.Security.EscapeOutput
+        }
+        return $html;
+    }
+
     public function settings_expiry_check_button($field, $echo = true)
     {
         ob_start();

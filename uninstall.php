@@ -31,6 +31,7 @@ $meta_keys = array(
     '_gf_aee_action_log',
     '_gf_aee_post_notified_success',
     '_gf_aee_post_notified_fail',
+    '_gf_aee_trashed_at',
 );
 
 $meta_table = $wpdb->prefix . 'gf_entry_meta';
@@ -42,6 +43,7 @@ if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $meta_table ) ) === 
 
 // ── 4. Clear scheduled cron events ───────────────────────────────────────
 wp_clear_scheduled_hook( 'gf_aee_run_expiry_check' );
+wp_clear_scheduled_hook( 'gf_aee_purge_trash' );
 wp_unschedule_all( 'gf_aee_send_pre_notification' );
 wp_unschedule_all( 'gf_aee_send_post_notification' );
 

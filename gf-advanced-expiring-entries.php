@@ -4,7 +4,7 @@
  * Plugin Name: GF Advanced Expiring Entries
  * Plugin URI:  https://github.com/guilamu/gf-advanced-expiring-entries
  * Description: Configure per-form expiration rules (feeds) for Gravity Forms entries. Supports fixed and dynamic expiry, multiple actions, pre-expiry notifications, and admin overrides.
- * Version: 1.4.1
+ * Version: 1.5.0
  * Author: Guilamu
  * Author URI: https://github.com/guilamu
  * Text Domain: gf-advanced-expiring-entries
@@ -23,7 +23,7 @@ if (! defined('GF_AEE_DEBUG')) {
     define('GF_AEE_DEBUG', false);
 }
 
-define('GF_AEE_VERSION', '1.4.1');
+define('GF_AEE_VERSION', '1.5.0');
 define('GF_AEE_PLUGIN_FILE', __FILE__);
 define('GF_AEE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('GF_AEE_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -57,6 +57,7 @@ class GF_AEE_Bootstrap
         require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-scheduler.php';
         require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-log.php';
         require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-expiry-runner.php';
+        require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-trash-purge.php';
         require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-dashboard.php';
         require_once GF_AEE_PLUGIN_DIR . 'includes/class-gf-aee-addon.php';
 
@@ -99,6 +100,9 @@ function gf_aee_deactivate()
 {
     if (class_exists('GF_AEE_Scheduler')) {
         GF_AEE_Scheduler::unschedule_all();
+    }
+    if (class_exists('GF_AEE_Trash_Purge')) {
+        GF_AEE_Trash_Purge::unschedule_all();
     }
 }
 
